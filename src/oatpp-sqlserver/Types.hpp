@@ -22,12 +22,12 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_Types_hpp
-#define oatpp_postgresql_Types_hpp
+#ifndef oatpp_sqlserver_Types_hpp
+#define oatpp_sqlserver_Types_hpp
 
 #include "mapping/type/Uuid.hpp"
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 /**
  * Uuid as oatpp primitive type.
@@ -36,4 +36,4 @@ typedef oatpp::data::type::Primitive<mapping::type::UuidObject, mapping::type::_
 
 }}
 
-#endif // oatpp_postgresql_Types_hpp
+#endif // oatpp_sqlserver_Types_hpp

@@ -26,8 +26,8 @@
 #include "Serializer.hpp"
 
 #include "Oid.hpp"
-#include "PgArray.hpp"
-#include "oatpp-postgresql/Types.hpp"
+#include "SqlArray.hpp"
+#include "oatpp-sqlserver/Types.hpp"
 
 #if defined(WIN32) || defined(_WIN32)
   #include <WinSock2.h>
@@ -35,7 +35,7 @@
   #include <arpa/inet.h>
 #endif
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 Serializer::Serializer() {
   setSerializerMethods();

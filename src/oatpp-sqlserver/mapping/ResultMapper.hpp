@@ -22,15 +22,16 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_mapping_ResultMapper_hpp
-#define oatpp_postgresql_mapping_ResultMapper_hpp
+#ifndef oatpp_sqlserver_mapping_ResultMapper_hpp
+#define oatpp_sqlserver_mapping_ResultMapper_hpp
 
 #include "Deserializer.hpp"
 #include "oatpp/data/mapping/TypeResolver.hpp"
 #include "oatpp/Types.hpp"
-#include <libpq-fe.h>
+#include <sql.h>
+#include <sqlext.h>
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 /**
  * Mapper from PostgreSQL result to oatpp objects.
@@ -160,4 +161,4 @@ public:
 
 }}}
 
-#endif //oatpp_postgresql_mapping_ResultMapper_hpp
+#endif //oatpp_sqlserver_mapping_ResultMapper_hpp
