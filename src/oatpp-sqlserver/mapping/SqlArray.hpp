@@ -23,15 +23,16 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_mapping_PgArray_hpp
-#define oatpp_postgresql_mapping_PgArray_hpp
+#ifndef oatpp_sqlserver_mapping_SqlArray_hpp
+#define oatpp_sqlserver_mapping_SqlArray_hpp
 
 #include "oatpp/data/stream/Stream.hpp"
 #include "oatpp/Types.hpp"
 
-#include <libpq-fe.h>
+#include <sql.h>
+#include <sqlext.h>
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 // after https://stackoverflow.com/questions/4016412/postgresqls-libpq-encoding-for-binary-transport-of-array-data
 struct PgArrayHeader {
@@ -77,4 +78,4 @@ public:
 
 }}}
 
-#endif // oatpp_postgresql_mapping_PgArray_hpp
+#endif // oatpp_sqlserver_mapping_SqlArray_hpp

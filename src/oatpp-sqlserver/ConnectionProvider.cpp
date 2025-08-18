@@ -24,7 +24,7 @@
 
 #include "ConnectionProvider.hpp"
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 void ConnectionProvider::ConnectionInvalidator::invalidate(const std::shared_ptr<Connection> &resource) {
   (void) resource;
@@ -38,21 +38,58 @@ ConnectionProvider::ConnectionProvider(const oatpp::String& connectionString)
 
 provider::ResourceHandle<Connection> ConnectionProvider::get() {
 
-  auto handle = PQconnectdb(m_connectionString->c_str());
+  HENV henv;
+  HDBC hdbc;
+  SQLRETURN ret;
 
-  if(PQstatus(handle) == CONNECTION_BAD) {
-    std::string errMsg = PQerrorMessage(handle);
-    PQfinish(handle);
-    throw std::runtime_error("[oatpp::postgresql::ConnectionProvider::get()]: "
+  // Allocate environment handle
+  ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
+  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    throw std::runtime_error("[oatpp::sqlserver::ConnectionProvider::get()]: "
+                             "Error. Failed to allocate environment handle.");
+  }
+
+  // Set the ODBC version environment attribute
+  ret = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
+  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    SQLFreeHandle(SQL_HANDLE_ENV, henv);
+    throw std::runtime_error("[oatpp::sqlserver::ConnectionProvider::get()]: "
+                             "Error. Failed to set ODBC version.");
+  }
+
+  // Allocate connection handle
+  ret = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    SQLFreeHandle(SQL_HANDLE_ENV, henv);
+    throw std::runtime_error("[oatpp::sqlserver::ConnectionProvider::get()]: "
+                             "Error. Failed to allocate connection handle.");
+  }
+
+  // Connect to SQL Server
+  ret = SQLDriverConnect(hdbc, NULL, 
+                         (SQLCHAR*)m_connectionString->c_str(), SQL_NTS,
+                         NULL, 0, NULL, SQL_DRIVER_NOPROMPT);
+  if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+    SQLCHAR sqlState[6], message[256];
+    SQLINTEGER nativeError;
+    SQLSMALLINT messageLength;
+    
+    SQLGetDiagRec(SQL_HANDLE_DBC, hdbc, 1, sqlState, &nativeError, 
+                  message, sizeof(message), &messageLength);
+    
+    std::string errMsg = std::string((char*)message, messageLength);
+    SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+    SQLFreeHandle(SQL_HANDLE_ENV, henv);
+    throw std::runtime_error("[oatpp::sqlserver::ConnectionProvider::get()]: "
                              "Error. Can't connect. " + errMsg);
   }
 
-  return provider::ResourceHandle<Connection>(std::make_shared<ConnectionImpl>(handle), m_invalidator);
+  return provider::ResourceHandle<Connection>(std::make_shared<ConnectionImpl>(henv, hdbc), m_invalidator);
 
 }
 
 async::CoroutineStarterForResult<const provider::ResourceHandle<Connection>&> ConnectionProvider::getAsync() {
-  throw std::runtime_error("[oatpp::postgresql::ConnectionProvider::getAsync()]: Error. Not implemented!");
+  throw std::runtime_error("[oatpp::sqlserver::ConnectionProvider::getAsync()]: Error. Not implemented!");
 }
 
 void ConnectionProvider::stop() {

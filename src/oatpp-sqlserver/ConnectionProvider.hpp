@@ -22,15 +22,15 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_ConnectionProvider_hpp
-#define oatpp_postgresql_ConnectionProvider_hpp
+#ifndef oatpp_sqlserver_ConnectionProvider_hpp
+#define oatpp_sqlserver_ConnectionProvider_hpp
 
 #include "Connection.hpp"
 
 #include "oatpp/provider/Pool.hpp"
 #include "oatpp/Types.hpp"
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 /**
  * Connection provider.
@@ -75,8 +75,8 @@ public:
 
 /**
  * Connection pool. <br>
- * - &id:oatpp::postgresql::Connection;.
- * - &id:oatpp::postgresql::ConnectionAcquisitionProxy;.
+ * - &id:oatpp::sqlserver::Connection;.
+ * - &id:oatpp::sqlserver::ConnectionAcquisitionProxy;.
  */
 typedef oatpp::provider::Pool<
   provider::Provider<Connection>,
@@ -86,4 +86,4 @@ typedef oatpp::provider::Pool<
 
 }}
 
-#endif // oatpp_postgresql_ConnectionProvider_hpp
+#endif // oatpp_sqlserver_ConnectionProvider_hpp

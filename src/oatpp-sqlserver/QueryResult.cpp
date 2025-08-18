@@ -24,49 +24,44 @@
 
 #include "QueryResult.hpp"
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
-QueryResult::QueryResult(PGresult* dbResult,
+QueryResult::QueryResult(HSTMT stmt,
                          const provider::ResourceHandle<orm::Connection>& connection,
                          const std::shared_ptr<mapping::ResultMapper>& resultMapper,
                          const std::shared_ptr<const data::mapping::TypeResolver>& typeResolver)
-  : m_dbResult(dbResult)
+  : m_stmt(stmt)
   , m_connection(connection)
   , m_resultMapper(resultMapper)
-  , m_resultData(dbResult, typeResolver)
+  , m_resultData(stmt, typeResolver)
 {
-  auto status = PQresultStatus(m_dbResult);
-  switch(status) {
-
-    case PGRES_SINGLE_TUPLE: {
-      throw std::runtime_error("[oatpp::postgresql::QueryResult::QueryResult()]: Error. Single-row mode is not supported!");
-    }
-
-    case PGRES_TUPLES_OK: {
-      m_success = true;
-      m_type = TYPE_TUPLES;
-      break;
-    }
-
-    case PGRES_COMMAND_OK: {
+  SQLRETURN ret = SQLRowCount(m_stmt, &m_rowCount);
+  if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
+    if (m_rowCount >= 0) {
       m_success = true;
       m_type = TYPE_COMMAND;
-      break;
-    }
-
-    default: {
-      m_success = false;
-      m_type = TYPE_ERROR;
-      if(status == PGRES_FATAL_ERROR) {
-        connection.invalidator->invalidate(connection.object);
+    } else {
+      // Check if there are result columns
+      SQLSMALLINT numCols;
+      ret = SQLNumResultCols(m_stmt, &numCols);
+      if (ret == SQL_SUCCESS && numCols > 0) {
+        m_success = true;
+        m_type = TYPE_TUPLES;
+      } else {
+        m_success = true;
+        m_type = TYPE_COMMAND;
       }
     }
-
+  } else {
+    m_success = false;
+    m_type = TYPE_ERROR;
   }
 }
 
 QueryResult::~QueryResult() {
-  PQclear(m_dbResult);
+  if (m_stmt != SQL_NULL_HSTMT) {
+    SQLFreeHandle(SQL_HANDLE_STMT, m_stmt);
+  }
 }
 
 provider::ResourceHandle<orm::Connection> QueryResult::getConnection() const {
@@ -79,8 +74,14 @@ bool QueryResult::isSuccess() const {
 
 oatpp::String QueryResult::getErrorMessage() const {
   if(!m_success) {
-    auto pgConnection = std::static_pointer_cast<postgresql::Connection>(m_connection.object);
-    return PQerrorMessage(pgConnection->getHandle());
+    SQLCHAR sqlState[6], message[256];
+    SQLINTEGER nativeError;
+    SQLSMALLINT messageLength;
+    
+    SQLGetDiagRec(SQL_HANDLE_STMT, m_stmt, 1, sqlState, &nativeError, 
+                  message, sizeof(message), &messageLength);
+    
+    return oatpp::String((char*)message, messageLength);
   }
   return nullptr;
 }
@@ -92,7 +93,7 @@ v_int64 QueryResult::getPosition() const {
 v_int64 QueryResult::getKnownCount() const {
   switch(m_type) {
     case TYPE_TUPLES: return m_resultData.rowCount;
-//    case TYPE_COMMAND: return 0;
+    case TYPE_COMMAND: return m_rowCount;
   }
   return 0;
 }

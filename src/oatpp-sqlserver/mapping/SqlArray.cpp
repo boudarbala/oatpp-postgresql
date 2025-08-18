@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "PgArray.hpp"
+#include "SqlArray.hpp"
 
 #if defined(WIN32) || defined(_WIN32)
   #include <WinSock2.h>
