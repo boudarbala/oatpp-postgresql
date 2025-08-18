@@ -24,7 +24,7 @@
 
 /**[info]
  *
- * This is just a header file which includes all oatpp-postgresql components:
+ * This is just a header file which includes all oatpp-sqlserver components:
  *
  * ```cpp
  * #include "Executor.hpp"
@@ -36,8 +36,8 @@
  * ```
  */
 
-#ifndef oatpp_postgresql_orm_hpp
-#define oatpp_postgresql_orm_hpp
+#ifndef oatpp_sqlserver_orm_hpp
+#define oatpp_sqlserver_orm_hpp
 
 #include "Executor.hpp"
 #include "Types.hpp"
@@ -46,4 +46,4 @@
 #include "oatpp/orm/DbClient.hpp"
 #include "oatpp/macro/codegen.hpp"
 
-#endif // oatpp_postgresql_orm_hpp
+#endif // oatpp_sqlserver_orm_hpp

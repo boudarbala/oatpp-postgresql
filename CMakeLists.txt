@@ -4,19 +4,19 @@ cmake_minimum_required(VERSION 3.20)
 ## These variables are passed to oatpp-module-install.cmake script
 ## use these variables to configure module installation
 
-set(OATPP_THIS_MODULE_NAME oatpp-postgresql) ## name of the module (also name of folders in installation dirs)
+set(OATPP_THIS_MODULE_NAME oatpp-sqlserver) ## name of the module (also name of folders in installation dirs)
 set(OATPP_THIS_MODULE_VERSION "1.4.0") ## version of the module (also sufix of folders in installation dirs)
-set(OATPP_THIS_MODULE_LIBRARIES oatpp-postgresql) ## list of libraries to find when find_package is called
-set(OATPP_THIS_MODULE_TARGETS oatpp-postgresql) ## list of targets to install
-set(OATPP_THIS_MODULE_DIRECTORIES oatpp-postgresql) ## list of directories to install
+set(OATPP_THIS_MODULE_LIBRARIES oatpp-sqlserver) ## list of libraries to find when find_package is called
+set(OATPP_THIS_MODULE_TARGETS oatpp-sqlserver) ## list of targets to install
+set(OATPP_THIS_MODULE_DIRECTORIES oatpp-sqlserver) ## list of directories to install
 
 ###################################################################################################
 
 project(${OATPP_THIS_MODULE_NAME}
         VERSION ${OATPP_THIS_MODULE_VERSION}
         LANGUAGES CXX
-        ## HOMEPAGE_URL "https://github.com/oatpp/oatpp-postgresql"
-        ## DESCRIPTION "Something about postgresql"
+        ## HOMEPAGE_URL "https://github.com/oatpp/oatpp-sqlserver"
+        ## DESCRIPTION "Something about sqlserver"
 )
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
@@ -92,14 +92,16 @@ endif()
 message("\n############################################################################")
 message("## ${OATPP_THIS_MODULE_NAME} module. Resolving dependencies...\n")
 
-set(PostgreSQL_ADDITIONAL_VERSIONS "17")
+# Find ODBC
+find_path(ODBC_INCLUDE_DIR sql.h PATHS /usr/include /usr/local/include)
+find_library(ODBC_LIBRARY NAMES odbc PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu)
 
-find_package(PostgreSQL REQUIRED)
+if(NOT ODBC_INCLUDE_DIR OR NOT ODBC_LIBRARY)
+    message(FATAL_ERROR "ODBC library not found. Please install unixodbc-dev or similar package.")
+endif()
 
-message("PostgreSQL_INCLUDE_DIRS=${PostgreSQL_INCLUDE_DIRS}")
-message("PostgreSQL_LIBRARIES=${PostgreSQL_LIBRARIES}")
-message("PostgreSQL_TYPE_INCLUDE_DIR=${PostgreSQL_TYPE_INCLUDE_DIR}")
-message("PostgreSQL_VERSION_STRING=${PostgreSQL_VERSION_STRING}")
+message("ODBC_INCLUDE_DIR=${ODBC_INCLUDE_DIR}")
+message("ODBC_LIBRARY=${ODBC_LIBRARY}")
 
 message("\n############################################################################\n")
 

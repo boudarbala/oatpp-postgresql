@@ -22,19 +22,20 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_Connection_hpp
-#define oatpp_postgresql_Connection_hpp
+#ifndef oatpp_sqlserver_Connection_hpp
+#define oatpp_sqlserver_Connection_hpp
 
 #include "oatpp/orm/Connection.hpp"
 #include "oatpp/provider/Pool.hpp"
 #include "oatpp/Types.hpp"
 
-#include <libpq-fe.h>
+#include <sql.h>
+#include <sqlext.h>
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 /**
- * Implementation of &id:oatpp::orm::Connection; for PostgreSQL.
+ * Implementation of &id:oatpp::orm::Connection; for SQL Server.
  */
 class Connection : public orm::Connection {
 private:
@@ -42,10 +43,10 @@ private:
 public:
 
   /**
-   * Get PostgreSQL native connection handle.
+   * Get SQL Server native connection handle.
    * @return
    */
-  virtual PGconn* getHandle() = 0;
+  virtual HDBC getHandle() = 0;
 
   virtual void setPrepared(const oatpp::String& statementName) = 0;
   virtual bool isPrepared(const oatpp::String& statementName) = 0;
@@ -57,14 +58,15 @@ public:
 
 class ConnectionImpl : public Connection {
 private:
-  PGconn* m_connection;
+  HDBC m_connection;
+  HENV m_environment;
   std::unordered_set<oatpp::String> m_prepared;
 public:
 
-  ConnectionImpl(PGconn* connection);
+  ConnectionImpl(HENV environment, HDBC connection);
   ~ConnectionImpl();
 
-  PGconn* getHandle() override;
+  HDBC getHandle() override;
 
   void setPrepared(const oatpp::String& statementName) override;
   bool isPrepared(const oatpp::String& statementName) override;
@@ -78,7 +80,7 @@ struct ConnectionAcquisitionProxy : public provider::AcquisitionProxy<Connection
     : provider::AcquisitionProxy<Connection, ConnectionAcquisitionProxy>(resource, pool)
   {}
 
-  PGconn* getHandle() override {
+  HDBC getHandle() override {
     return _handle.object->getHandle();
   }
 
@@ -94,4 +96,4 @@ struct ConnectionAcquisitionProxy : public provider::AcquisitionProxy<Connection
 
 }}
 
-#endif //oatpp_postgresql_Connection_hpp
+#endif //oatpp_sqlserver_Connection_hpp
