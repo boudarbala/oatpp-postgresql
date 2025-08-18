@@ -24,7 +24,7 @@
 
 #include "Connection.hpp"
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 void Connection::setInvalidator(const std::shared_ptr<provider::Invalidator<Connection>>& invalidator) {
   m_invalidator = invalidator;
@@ -34,17 +34,22 @@ std::shared_ptr<provider::Invalidator<Connection>> Connection::getInvalidator() 
   return m_invalidator;
 }
 
-ConnectionImpl::ConnectionImpl(PGconn* connection)
-  : m_connection(connection)
+ConnectionImpl::ConnectionImpl(HENV environment, HDBC connection)
+  : m_environment(environment)
+  , m_connection(connection)
 {}
 
 ConnectionImpl::~ConnectionImpl() {
-  if(m_connection != nullptr) {
-    PQfinish(m_connection);
+  if(m_connection != SQL_NULL_HDBC) {
+    SQLDisconnect(m_connection);
+    SQLFreeHandle(SQL_HANDLE_DBC, m_connection);
+  }
+  if(m_environment != SQL_NULL_HENV) {
+    SQLFreeHandle(SQL_HANDLE_ENV, m_environment);
   }
 }
 
-PGconn* ConnectionImpl::getHandle() {
+HDBC ConnectionImpl::getHandle() {
   return m_connection;
 }
 

@@ -23,22 +23,24 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_mapping_PgArray_hpp
-#define oatpp_postgresql_mapping_PgArray_hpp
+#ifndef oatpp_sqlserver_mapping_SqlArray_hpp
+#define oatpp_sqlserver_mapping_SqlArray_hpp
 
+#include "Oid.hpp"
 #include "oatpp/data/stream/Stream.hpp"
 #include "oatpp/Types.hpp"
 
-#include <libpq-fe.h>
+#include <sql.h>
+#include <sqlext.h>
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
-// after https://stackoverflow.com/questions/4016412/postgresqls-libpq-encoding-for-binary-transport-of-array-data
-struct PgArrayHeader {
+// SQL Server array structure for handling array data types
+struct SqlArrayHeader {
 
   v_int32 ndim = 0;   // Number of dimensions
-  //v_int32 _ign;   // offset for data, removed by libpq
-  Oid oid = InvalidOid;        // type of element in the array
+  //v_int32 _ign;   // offset for data, removed by driver
+  v_int32 oid = InvalidSqlOid;        // type of element in the array
 
   // Start of array (1st dimension)
   v_int32 size = 0;   // Number of elements
@@ -70,11 +72,11 @@ public:
                                const std::vector<v_int32>& dimensions);
 
   static void readArrayHeader(data::stream::InputStream* stream,
-                              PgArrayHeader& arrayHeader,
+                              SqlArrayHeader& arrayHeader,
                               std::vector<v_int32>& dimensions);
 
 };
 
 }}}
 
-#endif // oatpp_postgresql_mapping_PgArray_hpp
+#endif // oatpp_sqlserver_mapping_SqlArray_hpp

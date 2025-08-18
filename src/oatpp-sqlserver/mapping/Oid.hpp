@@ -1,0 +1,73 @@
+/***************************************************************************
+ *
+ * Project         _____    __   ____   _      _
+ *                (  _  )  /__\ (_  _)_| |_  _| |_
+ *                 )(_)(  /(__)\  )( (_   _)(_   _)
+ *                (_____)(__)(__)(__)  |_|    |_|
+ *
+ *
+ * Copyright 2018-present, Leonid Stryzhevskyi <lganzzzo@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ***************************************************************************/
+
+/**[info]
+ *
+ * SQL Server type definitions for ODBC.
+ */
+
+#ifndef oatpp_sqlserver_mapping_Oid_hpp
+#define oatpp_sqlserver_mapping_Oid_hpp
+
+/***************************************************************************
+ * SQL Server/ODBC type definitions
+ ***************************************************************************/
+
+#include <sql.h>
+#include <sqlext.h>
+
+// SQL Server data type mappings
+#define SQL_TYPE_VARCHAR        SQL_VARCHAR
+#define SQL_TYPE_CHAR           SQL_CHAR
+#define SQL_TYPE_NVARCHAR       SQL_WVARCHAR
+#define SQL_TYPE_NCHAR          SQL_WCHAR
+#define SQL_TYPE_INT            SQL_INTEGER
+#define SQL_TYPE_SMALLINT       SQL_SMALLINT
+#define SQL_TYPE_BIGINT         SQL_BIGINT
+#define SQL_TYPE_REAL           SQL_REAL
+#define SQL_TYPE_FLOAT          SQL_FLOAT
+#define SQL_TYPE_DOUBLE         SQL_DOUBLE
+#define SQL_TYPE_DECIMAL        SQL_DECIMAL
+#define SQL_TYPE_NUMERIC        SQL_NUMERIC
+#define SQL_TYPE_BIT            SQL_BIT
+#define SQL_TYPE_TINYINT        SQL_TINYINT
+#define SQL_TYPE_DATETIME       SQL_TYPE_TIMESTAMP
+#define SQL_TYPE_SMALLDATETIME  SQL_TYPE_TIMESTAMP
+#define SQL_TYPE_DATETIME2      SQL_TYPE_TIMESTAMP
+#define SQL_TYPE_SQLDATE        SQL_TYPE_DATE
+#define SQL_TYPE_SQLTIME        SQL_TYPE_TIME
+#define SQL_TYPE_UNIQUEIDENTIFIER SQL_GUID
+#define SQL_TYPE_BINARY         SQL_BINARY
+#define SQL_TYPE_VARBINARY      SQL_VARBINARY
+#define SQL_TYPE_IMAGE          SQL_LONGVARBINARY
+#define SQL_TYPE_TEXT           SQL_LONGVARCHAR
+#define SQL_TYPE_NTEXT          SQL_WLONGVARCHAR
+
+// Use SQL types instead of PostgreSQL OIDs
+typedef SQLSMALLINT SqlOid;
+typedef SQLSMALLINT Oid; // Compatibility alias
+#define InvalidSqlOid           SQL_UNKNOWN_TYPE
+#define InvalidOid              InvalidSqlOid
+
+#endif // oatpp_sqlserver_mapping_Oid_hpp

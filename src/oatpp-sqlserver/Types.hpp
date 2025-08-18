@@ -22,28 +22,18 @@
  *
  ***************************************************************************/
 
-/**[info]
- *
- * This is just a header file which includes all oatpp-postgresql components:
- *
- * ```cpp
- * #include "Executor.hpp"
- * #include "Types.hpp"
- *
- * #include "oatpp/orm/SchemaMigration.hpp"
- * #include "oatpp/orm/DbClient.hpp"
- * #include "oatpp/macro/codegen.hpp"
- * ```
+#ifndef oatpp_sqlserver_Types_hpp
+#define oatpp_sqlserver_Types_hpp
+
+#include "mapping/type/Uuid.hpp"
+
+namespace oatpp { namespace sqlserver {
+
+/**
+ * Uuid as oatpp primitive type.
  */
+typedef oatpp::data::type::Primitive<mapping::type::UuidObject, mapping::type::__class::Uuid> Uuid;
 
-#ifndef oatpp_postgresql_orm_hpp
-#define oatpp_postgresql_orm_hpp
+}}
 
-#include "Executor.hpp"
-#include "Types.hpp"
-
-#include "oatpp/orm/SchemaMigration.hpp"
-#include "oatpp/orm/DbClient.hpp"
-#include "oatpp/macro/codegen.hpp"
-
-#endif // oatpp_postgresql_orm_hpp
+#endif // oatpp_sqlserver_Types_hpp

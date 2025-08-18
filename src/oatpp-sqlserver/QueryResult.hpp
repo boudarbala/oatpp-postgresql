@@ -22,19 +22,19 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_QueryResult_hpp
-#define oatpp_postgresql_QueryResult_hpp
+#ifndef oatpp_sqlserver_QueryResult_hpp
+#define oatpp_sqlserver_QueryResult_hpp
 
 #include "ConnectionProvider.hpp"
 #include "mapping/Deserializer.hpp"
 #include "mapping/ResultMapper.hpp"
 #include "oatpp/orm/QueryResult.hpp"
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 
 /**
- * Implementation of &id:oatpp::orm::QueryResult;. for PostgreSQL.
+ * Implementation of &id:oatpp::orm::QueryResult;. for SQL Server.
  */
 class QueryResult : public orm::QueryResult {
 private:
@@ -42,17 +42,18 @@ private:
   static constexpr v_int32 TYPE_COMMAND = 1;
   static constexpr v_int32 TYPE_TUPLES = 2;
 private:
-  PGresult* m_dbResult;
+  HSTMT m_stmt;
   provider::ResourceHandle<orm::Connection> m_connection;
   std::shared_ptr<mapping::ResultMapper> m_resultMapper;
   mapping::ResultMapper::ResultData m_resultData;
   bool m_success;
   v_int32 m_type;
+  SQLLEN m_rowCount;
 private:
   mapping::Deserializer m_deserializer;
 public:
 
-  QueryResult(PGresult* dbResult,
+  QueryResult(HSTMT stmt,
               const provider::ResourceHandle<orm::Connection>& connection,
               const std::shared_ptr<mapping::ResultMapper>& resultMapper,
               const std::shared_ptr<const data::mapping::TypeResolver>& typeResolver);
@@ -77,4 +78,4 @@ public:
 
 }}
 
-#endif //oatpp_postgresql_QueryResult_hpp
+#endif //oatpp_sqlserver_QueryResult_hpp

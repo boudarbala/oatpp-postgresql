@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 
-#include "PgArray.hpp"
+#include "SqlArray.hpp"
 
 #if defined(WIN32) || defined(_WIN32)
   #include <WinSock2.h>
@@ -30,7 +30,7 @@
   #include <arpa/inet.h>
 #endif
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 void ArrayUtils::writeArrayHeader(data::stream::ConsistentOutputStream* stream, Oid itemOid, const std::vector<v_int32>& dimensions) {
 
@@ -64,7 +64,7 @@ void ArrayUtils::writeArrayHeader(data::stream::ConsistentOutputStream* stream, 
 }
 
 void ArrayUtils::readArrayHeader(data::stream::InputStream* stream,
-                                 PgArrayHeader& arrayHeader,
+                                 SqlArrayHeader& arrayHeader,
                                  std::vector<v_int32>& dimensions)
 {
 

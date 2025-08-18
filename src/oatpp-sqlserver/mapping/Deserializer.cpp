@@ -26,10 +26,10 @@
 #include "Deserializer.hpp"
 
 #include "Oid.hpp"
-#include "PgArray.hpp"
-#include "oatpp-postgresql/Types.hpp"
+#include "SqlArray.hpp"
+#include "oatpp-sqlserver/Types.hpp"
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 Deserializer::InData::InData(PGresult* dbres, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver) {
   typeResolver = pTypeResolver;

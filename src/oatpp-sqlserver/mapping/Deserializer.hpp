@@ -23,16 +23,17 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_mapping_Deserializer_hpp
-#define oatpp_postgresql_mapping_Deserializer_hpp
+#ifndef oatpp_sqlserver_mapping_Deserializer_hpp
+#define oatpp_sqlserver_mapping_Deserializer_hpp
 
-#include "PgArray.hpp"
+#include "SqlArray.hpp"
 
 #include "oatpp/data/stream/BufferStream.hpp"
 #include "oatpp/data/mapping/TypeResolver.hpp"
 #include "oatpp/Types.hpp"
 
-#include <libpq-fe.h>
+#include <sql.h>
+#include <sqlext.h>
 
 #if defined(WIN32) || defined(_WIN32)
   #include <WinSock2.h>
@@ -40,7 +41,7 @@
   #include <arpa/inet.h>
 #endif
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 /**
  * Mapper from PostgreSQL values to oatpp values.
@@ -169,4 +170,4 @@ private:
 
 }}}
 
-#endif // oatpp_postgresql_mapping_Deserializer_hpp
+#endif // oatpp_sqlserver_mapping_Deserializer_hpp
