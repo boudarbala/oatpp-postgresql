@@ -28,6 +28,8 @@
 #include "oatpp/orm/Executor.hpp"
 #include "oatpp/utils/parser/Caret.hpp"
 
+// Cross-platform ODBC headers
+#ifdef _WIN32
 // Ensure Windows and SAL annotations are defined before ODBC headers
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -37,8 +39,15 @@
 #endif
 #include <Windows.h>
 #include <sal.h>
+#endif
+
 #include <sql.h>
 #include <sqlext.h>
+
+// Handle Windows BOOL macro conflict with oatpp
+#ifdef BOOL
+#undef BOOL
+#endif
 
 namespace oatpp { namespace sqlserver { namespace ql_template {
 
