@@ -27,8 +27,8 @@ add_library(${OATPP_THIS_MODULE_NAME}
         oatpp-sqlserver/Executor.hpp
         oatpp-sqlserver/QueryResult.cpp
         oatpp-sqlserver/QueryResult.hpp
-        oatpp-sqlserver/QueryBuilder.hpp
-        oatpp-sqlserver/AdvancedDbClient.hpp
+        oatpp-sqlserver/SimpleQueryBuilder.cpp
+        oatpp-sqlserver/SimpleQueryBuilder.hpp
         oatpp-sqlserver/Types.hpp
         oatpp-sqlserver/orm.hpp)
 
