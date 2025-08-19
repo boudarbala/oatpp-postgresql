@@ -34,6 +34,7 @@
  * SQL Server/ODBC type definitions
  ***************************************************************************/
 
+#ifdef _WIN32
 // Ensure Windows and SAL annotations are defined before ODBC headers
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -43,6 +44,8 @@
 #endif
 #include <Windows.h>
 #include <sal.h>
+#endif
+
 #include <sql.h>
 #include <sqlext.h>
 

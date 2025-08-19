@@ -29,6 +29,8 @@
 #include "oatpp/provider/Pool.hpp"
 #include "oatpp/Types.hpp"
 
+// Cross-platform ODBC headers
+#ifdef _WIN32
 // Ensure Windows base types (DWORD, BOOL, LPWSTR, etc.) are defined before ODBC headers
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -37,9 +39,15 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
+#endif
 
 #include <sql.h>
 #include <sqlext.h>
+
+// Handle Windows BOOL macro conflict with oatpp
+#ifdef BOOL
+#undef BOOL
+#endif
 
 namespace oatpp { namespace sqlserver {
 

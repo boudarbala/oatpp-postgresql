@@ -30,17 +30,7 @@
 #include "oatpp/data/stream/Stream.hpp"
 #include "oatpp/Types.hpp"
 
-// Ensure Windows and SAL annotations are defined before ODBC headers
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <Windows.h>
-#include <sal.h>
-#include <sql.h>
-#include <sqlext.h>
+// ODBC headers are already included in Oid.hpp with proper cross-platform support
 
 namespace oatpp { namespace sqlserver { namespace mapping {
 
