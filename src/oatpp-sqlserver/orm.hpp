@@ -24,12 +24,47 @@
 
 /**[info]
  *
- * This is just a header file which includes all oatpp-sqlserver components:
+ * This header file includes all oatpp-sqlserver components with sophisticated ORM features:
  *
+ * Core Components:
  * ```cpp
  * #include "Executor.hpp"
  * #include "Types.hpp"
+ * #include "SimpleQueryBuilder.hpp"
+ * ```
  *
+ * Enhanced Type System:
+ * - High-precision Decimal type for DECIMAL/NUMERIC columns with custom precision/scale
+ * - DateTime2 type with fractional seconds precision (0-7) for DATETIME2 columns
+ * - DateTimeOffset type with timezone information for DATETIMEOFFSET columns
+ * - Time type for time-of-day values with TIME columns
+ * - Date type for date-only values with DATE columns
+ * - UUID type for UNIQUEIDENTIFIER columns
+ *
+ * Advanced Query Building:
+ * - SimpleQueryBuilder with fluent API for complex SQL construction
+ * - Common Table Expressions (CTEs) support for recursive and analytical queries
+ * - Window functions integration (ROW_NUMBER, PERCENT_RANK, LAG, LEAD, etc.)
+ * - SQL Server-style pagination with OFFSET/FETCH NEXT
+ * - Sophisticated JOIN operations (INNER, LEFT, RIGHT, FULL)
+ * - Advanced analytics with GROUP BY, HAVING, and aggregation functions
+ *
+ * SQL Server Specific Features:
+ * - Native SQL Server data type mappings
+ * - High-precision numeric calculations
+ * - Timezone-aware date/time operations
+ * - Professional schema design patterns
+ * - Enterprise-grade query optimization
+ *
+ * Professional Applications:
+ * - Financial systems requiring precise decimal calculations
+ * - Global applications with timezone handling
+ * - Analytics platforms with sophisticated reporting
+ * - Enterprise software with complex business logic
+ * - Data warehousing and business intelligence
+ *
+ * Standard oatpp ORM:
+ * ```cpp
  * #include "oatpp/orm/SchemaMigration.hpp"
  * #include "oatpp/orm/DbClient.hpp"
  * #include "oatpp/macro/codegen.hpp"
@@ -41,6 +76,7 @@
 
 #include "Executor.hpp"
 #include "Types.hpp"
+#include "SimpleQueryBuilder.hpp"
 
 #include "oatpp/orm/SchemaMigration.hpp"
 #include "oatpp/orm/DbClient.hpp"

@@ -2,6 +2,10 @@
 add_library(${OATPP_THIS_MODULE_NAME}
         oatpp-sqlserver/mapping/type/Uuid.cpp
         oatpp-sqlserver/mapping/type/Uuid.hpp
+        oatpp-sqlserver/mapping/type/Decimal.cpp
+        oatpp-sqlserver/mapping/type/Decimal.hpp
+        oatpp-sqlserver/mapping/type/DateTime.cpp
+        oatpp-sqlserver/mapping/type/DateTime.hpp
         oatpp-sqlserver/mapping/Deserializer.cpp
         oatpp-sqlserver/mapping/Deserializer.hpp
         oatpp-sqlserver/mapping/Oid.hpp
@@ -23,6 +27,8 @@ add_library(${OATPP_THIS_MODULE_NAME}
         oatpp-sqlserver/Executor.hpp
         oatpp-sqlserver/QueryResult.cpp
         oatpp-sqlserver/QueryResult.hpp
+        oatpp-sqlserver/SimpleQueryBuilder.cpp
+        oatpp-sqlserver/SimpleQueryBuilder.hpp
         oatpp-sqlserver/Types.hpp
         oatpp-sqlserver/orm.hpp)
 

@@ -26,6 +26,8 @@
 #define oatpp_sqlserver_Types_hpp
 
 #include "mapping/type/Uuid.hpp"
+#include "mapping/type/Decimal.hpp"
+#include "mapping/type/DateTime.hpp"
 
 namespace oatpp { namespace sqlserver {
 
@@ -33,6 +35,31 @@ namespace oatpp { namespace sqlserver {
  * Uuid as oatpp primitive type.
  */
 typedef oatpp::data::type::Primitive<mapping::type::UuidObject, mapping::type::__class::Uuid> Uuid;
+
+/**
+ * High-precision decimal type for SQL Server DECIMAL/NUMERIC columns.
+ */
+typedef mapping::type::Decimal Decimal;
+
+/**
+ * High-precision datetime type for SQL Server DATETIME2 columns.
+ */
+typedef mapping::type::DateTime2 DateTime2;
+
+/**
+ * Datetime with timezone offset for SQL Server DATETIMEOFFSET columns.
+ */
+typedef mapping::type::DateTimeOffset DateTimeOffset;
+
+/**
+ * Time of day type for SQL Server TIME columns.
+ */
+typedef mapping::type::Time Time;
+
+/**
+ * Date type for SQL Server DATE columns.
+ */
+typedef mapping::type::Date Date;
 
 }}
 
