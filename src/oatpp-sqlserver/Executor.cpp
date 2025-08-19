@@ -224,13 +224,12 @@ std::shared_ptr<QueryResult> Executor::prepareQuery(const StringTemplate& queryT
   auto extra = std::static_pointer_cast<ql_template::Parser::TemplateExtra>(queryTemplate.getExtraData());
   auto paramTypes = getParamTypes(queryTemplate, extra->paramsTypeMap, typeResolver);
 
-  PGresult *qres = PQprepare(pgConnection->getHandle(),
-                             extra->templateName->c_str(),
-                             extra->preparedTemplate->c_str(),
-                             queryTemplate.getTemplateVariables().size(),
-                             paramTypes.get());
-
-  return std::make_shared<QueryResult>(qres, connection, m_resultMapper, typeResolver);
+  // TODO: Implement ODBC version of prepared statement creation
+  // This should use SQLPrepare and related ODBC functions
+  // For now, return nullptr to allow compilation
+  SQLHSTMT hstmt = nullptr; // Placeholder for ODBC implementation
+  
+  return std::make_shared<QueryResult>(hstmt, connection, m_resultMapper, typeResolver);
 
 }
 
@@ -242,15 +241,11 @@ std::shared_ptr<QueryResult> Executor::executeQueryPrepared(const StringTemplate
   auto pgConnection = std::static_pointer_cast<Connection>(connection.object);
   QueryParams queryParams(queryTemplate, params, m_serializer, typeResolver);
 
-  PGresult *qres = PQexecPrepared(pgConnection->getHandle(),
-                                  queryParams.queryName,
-                                  queryParams.count,
-                                  queryParams.paramValues.data(),
-                                  queryParams.paramLengths.data(),
-                                  queryParams.paramFormats.data(),
-                                  1);
-
-  return std::make_shared<QueryResult>(qres, connection, m_resultMapper, typeResolver);
+  // TODO: Implement ODBC version of prepared statement execution  
+  // This should use SQLExecute and related ODBC functions
+  SQLHSTMT hstmt = nullptr; // Placeholder for ODBC implementation
+  
+  return std::make_shared<QueryResult>(hstmt, connection, m_resultMapper, typeResolver);
 
 }
 
@@ -263,16 +258,11 @@ std::shared_ptr<QueryResult> Executor::executeQuery(const StringTemplate& queryT
   auto pgConnection = std::static_pointer_cast<Connection>(connection.object);
   QueryParams queryParams(queryTemplate, params, m_serializer, typeResolver);
 
-  PGresult *qres = PQexecParams(pgConnection->getHandle(),
-                                queryParams.query,
-                                queryParams.count,
-                                queryParams.paramOids.data(),
-                                queryParams.paramValues.data(),
-                                queryParams.paramLengths.data(),
-                                queryParams.paramFormats.data(),
-                                1);
+  // TODO: Implement ODBC version of parameterized query execution
+  // This should use SQLExecDirect with parameter binding
+  SQLHSTMT hstmt = nullptr; // Placeholder for ODBC implementation
 
-  return std::make_shared<QueryResult>(qres, connection, m_resultMapper, typeResolver);
+  return std::make_shared<QueryResult>(hstmt, connection, m_resultMapper, typeResolver);
 
 }
 
@@ -362,21 +352,10 @@ std::shared_ptr<orm::QueryResult> Executor::exec(const oatpp::String& statement,
 
   auto pgConnection = std::static_pointer_cast<sqlserver::Connection>(conn.object);
 
-  PGresult *qres;
-  if(useExecParams) {
-    qres = PQexecParams(pgConnection->getHandle(),
-                        statement->c_str(),
-                        0 /* nParams */,
-                        nullptr /* paramTypes */,
-                        nullptr /* paramValues */,
-                        nullptr /* paramLengths */,
-                        nullptr /* paramFormats */,
-                        1 /* resultFormat */);
-  } else {
-    qres = PQexec(pgConnection->getHandle(), statement->c_str());
-  }
-
-  return std::make_shared<QueryResult>(qres, conn, m_resultMapper, m_defaultTypeResolver);
+  // TODO: Implement ODBC version of direct query execution
+  SQLHSTMT hstmt = nullptr; // Placeholder for ODBC implementation
+  
+  return std::make_shared<QueryResult>(hstmt, conn, m_resultMapper, m_defaultTypeResolver);
 
 }
 
