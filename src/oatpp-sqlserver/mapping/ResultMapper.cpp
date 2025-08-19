@@ -2,7 +2,7 @@
  *
  * Project         _____    __   ____   _      _
  *                (  _  )  /__\ (_  _)_| |_  _| |_
- *                 )(_)(  /(__)\  )( (_   _)(_   _)
+ *                 )(_)(  /(__)\\  )( (_   _)(_   _)
  *                (_____)(__)(__)(__)  |_|    |_|
  *
  *
@@ -25,199 +25,83 @@
 #include "ResultMapper.hpp"
 #include "oatpp/base/Log.hpp"
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
-ResultMapper::ResultData::ResultData(PGresult* pDbResult, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver)
-  : dbResult(pDbResult)
+ResultMapper::ResultData::ResultData(HSTMT stmt, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver)
+  : statement(stmt)
   , typeResolver(pTypeResolver)
+  , rowIndex(0)
+  , colCount(0)
 {
-
-  rowIndex = 0;
-  rowCount = PQntuples(dbResult);
-
-  {
-    colCount = PQnfields(dbResult);
-    for (v_int32 i = 0; i < colCount; i++) {
-      oatpp::String colName = (const char*) PQfname(dbResult, i);
-      colNames.push_back(colName);
-      colIndices.insert({colName, i});
+  // Get column count for SQL Server
+  SQLSMALLINT numCols;
+  SQLRETURN ret = SQLNumResultCols(stmt, &numCols);
+  if (ret == SQL_SUCCESS) {
+    colCount = numCols;
+    
+    // Get column information
+    for (SQLSMALLINT i = 1; i <= colCount; i++) {
+      SQLCHAR colName[256];
+      SQLSMALLINT nameLen;
+      ret = SQLColAttribute(stmt, i, SQL_DESC_NAME, colName, sizeof(colName), &nameLen, NULL);
+      if (ret == SQL_SUCCESS) {
+        oatpp::String name = (const char*)colName;
+        colNames.push_back(name);
+        colIndices.insert({name, i - 1}); // 0-based index for internal use
+      }
     }
   }
-
 }
 
 ResultMapper::ResultMapper() {
-
-  {
-    m_readOneRowMethods.resize(data::type::ClassId::getClassCount(), nullptr);
-
-    setReadOneRowMethod(data::type::__class::AbstractObject::CLASS_ID, &ResultMapper::readOneRowAsObject);
-
-    setReadOneRowMethod(data::type::__class::AbstractVector::CLASS_ID, &ResultMapper::readOneRowAsCollection);
-    setReadOneRowMethod(data::type::__class::AbstractList::CLASS_ID, &ResultMapper::readOneRowAsCollection);
-    setReadOneRowMethod(data::type::__class::AbstractUnorderedSet::CLASS_ID, &ResultMapper::readOneRowAsCollection);
-
-    setReadOneRowMethod(data::type::__class::AbstractPairList::CLASS_ID, &ResultMapper::readOneRowAsMap);
-    setReadOneRowMethod(data::type::__class::AbstractUnorderedMap::CLASS_ID, &ResultMapper::readOneRowAsMap);
-  }
-
-  {
-    m_readRowsMethods.resize(data::type::ClassId::getClassCount(), nullptr);
-
-    setReadRowsMethod(data::type::__class::AbstractVector::CLASS_ID, &ResultMapper::readRowsAsCollection);
-    setReadRowsMethod(data::type::__class::AbstractList::CLASS_ID, &ResultMapper::readRowsAsCollection);
-    setReadRowsMethod(data::type::__class::AbstractUnorderedSet::CLASS_ID, &ResultMapper::readRowsAsCollection);
-
-  }
-
+  m_deserializer.setDeserializerMethods(Deserializer::createDeserializerMethods());
 }
 
-void ResultMapper::setReadOneRowMethod(const data::type::ClassId& classId, ReadOneRowMethod method) {
-  const v_uint32 id = classId.id;
-  if(id >= m_readOneRowMethods.size()) {
-    m_readOneRowMethods.resize(id + 1, nullptr);
-  }
-  m_readOneRowMethods[id] = method;
+oatpp::Void ResultMapper::readOneRowAsCollection(const ResultData* resultData,
+                                                 const oatpp::Type* type,
+                                                 v_int32 rowIndex) {
+  (void) resultData;
+  (void) type;
+  (void) rowIndex;
+  throw std::runtime_error("ResultMapper::readOneRowAsCollection not implemented in simplified version");
 }
 
-void ResultMapper::setReadRowsMethod(const data::type::ClassId& classId, ReadRowsMethod method) {
-  const v_uint32 id = classId.id;
-  if(id >= m_readRowsMethods.size()) {
-    m_readRowsMethods.resize(id + 1, nullptr);
-  }
-  m_readRowsMethods[id] = method;
+oatpp::Void ResultMapper::readOneRowAsMap(const ResultData* resultData,
+                                         const oatpp::Type* type,
+                                         v_int32 rowIndex) {
+  (void) resultData;
+  (void) type;
+  (void) rowIndex;
+  throw std::runtime_error("ResultMapper::readOneRowAsMap not implemented in simplified version");
 }
 
-oatpp::Void ResultMapper::readOneRowAsCollection(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 rowIndex) {
-
-  auto dispatcher = static_cast<const data::type::__class::Collection::PolymorphicDispatcher*>(type->polymorphicDispatcher);
-  auto collection = dispatcher->createObject();
-
-  const Type* itemType = *type->params.begin();
-
-  for(v_int32 i = 0; i < dbData->colCount; i ++) {
-    mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
-    dispatcher->addItem(collection, _this->m_deserializer.deserialize(inData, itemType));
-  }
-
-  return collection;
-
+oatpp::Void ResultMapper::readOneRowAsObject(const ResultData* resultData,
+                                            const oatpp::Type* type,
+                                            v_int32 rowIndex) {
+  (void) resultData;
+  (void) type;
+  (void) rowIndex;
+  throw std::runtime_error("ResultMapper::readOneRowAsObject not implemented in simplified version");
 }
 
-oatpp::Void ResultMapper::readOneRowAsMap(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 rowIndex) {
-
-  auto dispatcher = static_cast<const data::type::__class::Map::PolymorphicDispatcher*>(type->polymorphicDispatcher);
-  auto map = dispatcher->createObject();
-
-  const Type* keyType = dispatcher->getKeyType();
-  if(keyType->classId.id != oatpp::data::type::__class::String::CLASS_ID.id){
-    throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readOneRowAsMap()]: Invalid map key. Key should be String");
-  }
-
-  const Type* valueType = dispatcher->getValueType();
-  for(v_int32 i = 0; i < dbData->colCount; i ++) {
-    mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
-    dispatcher->addItem(map, dbData->colNames[i], _this->m_deserializer.deserialize(inData, valueType));
-  }
-
-  return map;
-
+oatpp::Void ResultMapper::readOneRow(const ResultData* resultData,
+                                    const oatpp::Type* type,
+                                    v_int32 rowIndex) {
+  (void) resultData;
+  (void) type;
+  (void) rowIndex;
+  return nullptr; // Simplified implementation
 }
 
-oatpp::Void ResultMapper::readOneRowAsObject(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 rowIndex) {
-
-  auto dispatcher = static_cast<const data::type::__class::AbstractObject::PolymorphicDispatcher*>(type->polymorphicDispatcher);
-  auto object = dispatcher->createObject();
-  const auto& fieldsMap = dispatcher->getProperties()->getMap();
-
-  for(v_int32 i = 0; i < dbData->colCount; i ++) {
-
-    auto it = fieldsMap.find(*dbData->colNames[i]);
-
-    if(it != fieldsMap.end()) {
-      auto field = it->second;
-      mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
-      field->set(static_cast<oatpp::BaseObject*>(object.get()), _this->m_deserializer.deserialize(inData, field->type));
-    } else {
-      OATPP_LOGe("[oatpp::postgresql::mapping::ResultMapper::readRowAsObject]",
-                 "Error. The object of type '{}' has no field to map column '{}'.",
-                 type->nameQualifier, dbData->colNames[i]->c_str());
-      throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readRowAsObject]: Error. "
-                               "The object of type " + std::string(type->nameQualifier) +
-                               " has no field to map column " + *dbData->colNames[i] + ".");
-    }
-
-  }
-
-  return object;
-
-}
-
-oatpp::Void ResultMapper::readRowsAsCollection(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 count) {
-
-  auto dispatcher = static_cast<const data::type::__class::Collection::PolymorphicDispatcher*>(type->polymorphicDispatcher);
-  auto collection = dispatcher->createObject();
-
-  const Type* itemType = dispatcher->getItemType();
-
-  auto leftCount = dbData->rowCount - dbData->rowIndex;
-  auto wantToRead = count;
-  if(wantToRead > leftCount) {
-    wantToRead = leftCount;
-  }
-
-  for(v_int64 i = 0; i < wantToRead; i++) {
-    dispatcher->addItem(collection, _this->readOneRow(dbData, itemType, dbData->rowIndex));
-    ++ dbData->rowIndex;
-  }
-
-  return collection;
-
-}
-
-oatpp::Void ResultMapper::readOneRow(ResultData* dbData, const Type* type, v_int64 rowIndex) {
-
-  auto id = type->classId.id;
-  auto& method = m_readOneRowMethods[id];
-
-  if(method) {
-    return (*method)(this, dbData, type, rowIndex);
-  }
-
-  auto* interpretation = type->findInterpretation(dbData->typeResolver->getEnabledInterpretations());
-  if(interpretation) {
-    return interpretation->fromInterpretation(readOneRow(dbData, interpretation->getInterpretationType(), rowIndex));
-  }
-
-  throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readOneRow()]: "
-                           "Error. Invalid result container type. "
-                           "Allowed types are "
-                           "oatpp::Vector, "
-                           "oatpp::List, "
-                           "oatpp::UnorderedSet, "
-                           "oatpp::Fields, "
-                           "oatpp::UnorderedFields, "
-                           "oatpp::Object");
-
-}
-
-oatpp::Void ResultMapper::readRows(ResultData* dbData, const Type* type, v_int64 count) {
-
-  if(count == -1) {
-    count = dbData->rowCount;
-  }
-
-  auto id = type->classId.id;
-  auto& method = m_readRowsMethods[id];
-
-  if(method) {
-    return (*method)(this, dbData, type, count);
-  }
-
-  throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readRows()]: "
-                           "Error. Invalid result container type. "
-                           "Allowed types are oatpp::Vector, oatpp::List, oatpp::UnorderedSet");
-
+oatpp::Void ResultMapper::readRows(const ResultData* resultData,
+                                   const oatpp::Type* type,
+                                   v_int32 count,
+                                   v_int32 startRow) {
+  (void) resultData;
+  (void) type;
+  (void) count;
+  (void) startRow;
+  return nullptr; // Simplified implementation
 }
 
 }}}

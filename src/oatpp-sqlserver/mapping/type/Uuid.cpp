@@ -26,7 +26,7 @@
 #include "oatpp/encoding/Hex.hpp"
 #include "oatpp/data/stream/BufferStream.hpp"
 
-namespace oatpp { namespace postgresql { namespace mapping { namespace type {
+namespace oatpp { namespace sqlserver { namespace mapping { namespace type {
 
 UuidObject::UuidObject(v_char8 data[DATA_SIZE]) {
   std::memcpy(m_data, data, DATA_SIZE);
@@ -36,7 +36,7 @@ UuidObject::UuidObject(const oatpp::String& text) {
   data::stream::BufferOutputStream stream(16);
   encoding::Hex::decode(&stream, text->data(), text->size(), true);
   if(stream.getCurrentPosition() != 16) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::type::UuidObject::UuidObject()]: Error. Invalid string.");
+    throw std::runtime_error("[oatpp::sqlserver::mapping::type::UuidObject::UuidObject()]: Error. Invalid string.");
   }
   std::memcpy(m_data, stream.getData(), DATA_SIZE);
 }
@@ -74,11 +74,11 @@ bool UuidObject::operator!=(const UuidObject &other) const {
 
 namespace __class {
 
-  const oatpp::ClassId Uuid::CLASS_ID("oatpp::postgresql::Uuid");
+  const oatpp::ClassId Uuid::CLASS_ID("oatpp::sqlserver::Uuid");
 
   oatpp::Type* Uuid::createType() {
     oatpp::Type::Info info;
-    info.interpretationMap = {{"postgresql", new Inter()}};
+    info.interpretationMap = {{"sqlserver", new Inter()}};
     return new oatpp::Type(CLASS_ID, info);
   }
 

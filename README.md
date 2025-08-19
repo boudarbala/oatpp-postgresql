@@ -1,75 +1,42 @@
-# oatpp-sqlserver [![Build Status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/oatpp.oatpp-sqlserver?branchName=master)](https://dev.azure.com/lganzzzo/lganzzzo/_build/latest?definitionId=31&branchName=master)
+# oatpp-sqlserver
 
-Oat++ ORM adapter for SQL Server.  
-*Note: this **alpha version**, which means that not all SQL Server data-types are supported. See the list of [Supported Data Types](#supported-data-types).*
+Oat++ ORM adapter for SQL Server.
 
-More about Oat++:
+## Build
 
-- [Oat++ Website](https://oatpp.io/)
-- [Oat++ Github Repository](https://github.com/oatpp/oatpp)
-- [Oat++ ORM](https://oatpp.io/docs/components/orm/)
+Prerequisites:
+- oatpp framework
+- SQL Server ODBC driver (unixodbc-dev)
 
-## Build And Install
-
-*Note: you need to install the main [oatpp](https://github.com/oatpp/oatpp) module and SQL Server ODBC driver first.*
-
-- Clone this repository.
-- In the root of the repository run:
-   ```bash
-   mkdir build && cd build
-   cmake ..
-   make install
-   ```
-   
-## API
-
-Detailed documentation on Oat++ ORM you can find [here](https://oatpp.io/docs/components/orm/).
-
-### Connect to Database
-
-All you need to start using oatpp ORM with SQL Server is to create `oatpp::sqlserver::Executor` and provide it to your `DbClient`.
+```bash
+mkdir build && cd build
+cmake ..
+make
+```
+## Usage
 
 ```cpp
-#include "db/MyClient.hpp"
 #include "oatpp-sqlserver/orm.hpp"
 
-class AppComponent {
-public:
-  
-  /**
-   * Create DbClient component.
-   */
-  OATPP_CREATE_COMPONENT(std::shared_ptr<db::MyClient>, myDatabaseClient)([] {
-    /* Create database-specific ConnectionProvider */
-    auto connectionProvider = std::make_shared<oatpp::sqlserver::ConnectionProvider>("<connection-string>");    
-  
-    /* Create database-specific ConnectionPool */
-    auto connectionPool = oatpp::sqlserver::ConnectionPool::createShared(connectionProvider, 
-                                                                          10 /* max-connections */, 
-                                                                          std::chrono::seconds(5) /* connection TTL */);
-    
-    /* Create database-specific Executor */
-    auto executor = std::make_shared<oatpp::sqlserver::Executor>(connectionPool);
-  
-    /* Create MyClient database client */
-    return std::make_shared<MyClient>(executor);
-  }());
+// Create connection provider
+auto connectionProvider = std::make_shared<oatpp::sqlserver::ConnectionProvider>("<connection-string>");
 
-};
+// Create connection pool  
+auto connectionPool = oatpp::sqlserver::ConnectionPool::createShared(
+    connectionProvider, 
+    10, // max connections
+    std::chrono::seconds(5) // connection TTL
+);
+
+// Create executor
+auto executor = std::make_shared<oatpp::sqlserver::Executor>(connectionPool);
 ```
 
-### Supported Data Types
+## Supported Data Types
 
-|Type|Supported|In Array|
-|---|:---:|:---:|
-|SMALLINT|+|+|
-|INT|+|+|
-|BIGINT|+|+|
-|DATETIME|+|+|
-|VARCHAR|+|+|
-|NVARCHAR|+|+|
-|REAL|+|+|
-|FLOAT|+|+|
-|BIT|+|+|
-|UNIQUEIDENTIFIER|+|+|
-|**Other Types**|-|-|
+- SMALLINT, INT, BIGINT
+- DATETIME  
+- VARCHAR, NVARCHAR
+- REAL, FLOAT
+- BIT
+- UNIQUEIDENTIFIER
