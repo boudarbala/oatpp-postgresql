@@ -2,7 +2,7 @@
  *
  * Project         _____    __   ____   _      _
  *                (  _  )  /__\ (_  _)_| |_  _| |_
- *                 )(_)(  /(__)\  )( (_   _)(_   _)
+ *                 )(_)(  /(__)\\  )( (_   _)(_   _)
  *                (_____)(__)(__)(__)  |_|    |_|
  *
  *
@@ -30,11 +30,12 @@
 #include "oatpp/Types.hpp"
 #include <sql.h>
 #include <sqlext.h>
+#include <unordered_map>
 
 namespace oatpp { namespace sqlserver { namespace mapping {
 
 /**
- * Mapper from PostgreSQL result to oatpp objects.
+ * Mapper from SQL Server result to oatpp objects.
  */
 class ResultMapper {
 public:
@@ -46,119 +47,70 @@ public:
 
     /**
      * Constructor.
-     * @param pDbResult
-     * @param pTypeResolver
+     * @param stmt - SQL Server statement handle
+     * @param pTypeResolver - type resolver
      */
-    ResultData(PGresult* pDbResult, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver);
+    ResultData(HSTMT stmt, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver);
 
-    /**
-     * PGResult.
-     */
-    PGresult* dbResult;
-
-    /**
-     * &id:oatpp::data::mapping::TypeResolver;.
-     */
+    HSTMT statement;
     std::shared_ptr<const data::mapping::TypeResolver> typeResolver;
 
-    /**
-     * Column names.
-     */
+    v_int32 rowIndex;
+    v_int32 colCount;
+
     std::vector<oatpp::String> colNames;
-
-    /**
-     * Column indices.
-     */
-    std::unordered_map<data::share::StringKeyLabel, v_int32> colIndices;
-
-    /**
-     * Column count.
-     */
-    v_int64 colCount;
-
-    /**
-     * Current row index.
-     */
-    v_int64 rowIndex;
-
-    /**
-     * Row count.
-     */
-    v_int64 rowCount;
+    std::unordered_map<oatpp::String, v_int32> colIndices;
 
   };
 
 private:
-  typedef oatpp::data::type::Type Type;
-  typedef oatpp::Void (*ReadOneRowMethod)(ResultMapper*, ResultData*, const Type*, v_int64);
-  typedef oatpp::Void (*ReadRowsMethod)(ResultMapper*, ResultData*, const Type*, v_int64);
-private:
-
-  static oatpp::Void readOneRowAsCollection(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 rowIndex);
-  static oatpp::Void readOneRowAsMap(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 rowIndex);
-  static oatpp::Void readOneRowAsObject(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 rowIndex);
-
-  static oatpp::Void readRowsAsCollection(ResultMapper* _this, ResultData* dbData, const Type* type, v_int64 count);
-
-private:
   Deserializer m_deserializer;
-  std::vector<ReadOneRowMethod> m_readOneRowMethods;
-  std::vector<ReadRowsMethod> m_readRowsMethods;
+
 public:
 
   /**
-   * Default constructor.
+   * Constructor.
    */
   ResultMapper();
 
   /**
-   * Set "read one row" method for class id.
-   * @param classId
-   * @param method
+   * Read one row as collection.
    */
-  void setReadOneRowMethod(const data::type::ClassId& classId, ReadOneRowMethod method);
+  oatpp::Void readOneRowAsCollection(const ResultData* resultData,
+                                    const oatpp::Type* type,
+                                    v_int32 rowIndex);
 
   /**
-   * Set "read rows" method for class id.
-   * @param classId
-   * @param method
+   * Read one row as map.
    */
-  void setReadRowsMethod(const data::type::ClassId& classId, ReadRowsMethod method);
+  oatpp::Void readOneRowAsMap(const ResultData* resultData,
+                             const oatpp::Type* type,
+                             v_int32 rowIndex);
 
   /**
-   * Read one row to oatpp object or collection. <br>
-   * Allowed output type classes are:
-   *
-   * - &id:oatpp::Vector;
-   * - &id:oatpp::List;
-   * - &id:oatpp::UnorderedSet;
-   * - &id:oatpp::Fields;
-   * - &id:oatpp::UnorderedFields;
-   * - &id:oatpp::Object;
-   *
-   * @param dbData
-   * @param type
-   * @return
+   * Read one row as object.
    */
-  oatpp::Void readOneRow(ResultData* dbData, const Type* type, v_int64 rowIndex);
+  oatpp::Void readOneRowAsObject(const ResultData* resultData,
+                                const oatpp::Type* type,
+                                v_int32 rowIndex);
 
   /**
-   * Read `count` of rows to oatpp collection. <br>
-   * Allowed collections to store rows are:
-   *
-   * - &id:oatpp::Vector;
-   * - &id:oatpp::List;
-   * - &id:oatpp::UnorderedSet;.
-   *
-   * @param dbData
-   * @param type
-   * @param count
-   * @return
+   * Read one row.
    */
-  oatpp::Void readRows(ResultData* dbData, const Type* type, v_int64 count);
+  oatpp::Void readOneRow(const ResultData* resultData,
+                        const oatpp::Type* type,
+                        v_int32 rowIndex);
+
+  /**
+   * Read rows.
+   */
+  oatpp::Void readRows(const ResultData* resultData,
+                      const oatpp::Type* type,
+                      v_int32 count,
+                      v_int32 startRow);
 
 };
 
 }}}
 
-#endif //oatpp_sqlserver_mapping_ResultMapper_hpp
+#endif // oatpp_sqlserver_mapping_ResultMapper_hpp
