@@ -22,13 +22,13 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_ql_template_TemplateValueProvider_hpp
-#define oatpp_postgresql_ql_template_TemplateValueProvider_hpp
+#ifndef oatpp_sqlserver_ql_template_TemplateValueProvider_hpp
+#define oatpp_sqlserver_ql_template_TemplateValueProvider_hpp
 
 #include "oatpp/orm/Executor.hpp"
 #include "oatpp/data/stream/BufferStream.hpp"
 
-namespace oatpp { namespace postgresql { namespace ql_template {
+namespace oatpp { namespace sqlserver { namespace ql_template {
 
 /**
  * &id:oatpp::data::share::StringTemplate::ValueProvider;
@@ -42,4 +42,4 @@ public:
 
 }}}
 
-#endif // oatpp_postgresql_ql_template_TemplateValueProvider_hpp
+#endif // oatpp_sqlserver_ql_template_TemplateValueProvider_hpp

@@ -27,7 +27,7 @@
 #include "oatpp/data/stream/BufferStream.hpp"
 #include "oatpp/utils/parser/ParsingError.hpp"
 
-namespace oatpp { namespace postgresql { namespace ql_template {
+namespace oatpp { namespace sqlserver { namespace ql_template {
 
 oatpp::String Parser::preprocess(const oatpp::String& text, std::vector<CleanSection>& cleanSections) {
 

@@ -31,12 +31,20 @@
 
 namespace oatpp { namespace sqlserver { namespace mapping {
 
-Deserializer::InData::InData(PGresult* dbres, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver) {
+Deserializer::InData::InData(SQLHSTMT hstmt, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver) {
   typeResolver = pTypeResolver;
-  oid = PQftype(dbres, col);
-  size = PQgetlength(dbres, row, col);
-  data = PQgetvalue(dbres, row, col);
-  isNull = PQgetisnull(dbres, row, col) == 1;
+  
+  // TODO: Implement ODBC-specific data retrieval
+  // For now, set defaults to allow compilation
+  oid = SQL_UNKNOWN_TYPE;
+  size = 0;
+  data = nullptr;
+  isNull = true;
+  
+  // In a real implementation, we would:
+  // 1. Use SQLGetData or SQLFetch to get the data
+  // 2. Use SQLDescribeCol to get column metadata
+  // 3. Use SQLColAttribute to get type information
 }
 
 Deserializer::Deserializer() {
@@ -74,7 +82,7 @@ Deserializer::Deserializer() {
 
   ////
 
-  setDeserializerMethod(postgresql::mapping::type::__class::Uuid::CLASS_ID, &Deserializer::deserializeUuid);
+  setDeserializerMethod(sqlserver::mapping::type::__class::Uuid::CLASS_ID, &Deserializer::deserializeUuid);
 
 }
 
@@ -100,14 +108,14 @@ oatpp::Void Deserializer::deserialize(const InData& data, const Type* type) cons
     return interpretation->fromInterpretation(deserialize(data, interpretation->getInterpretationType()));
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserialize()]: "
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserialize()]: "
                            "Error. No deserialize method for type '" + std::string(type->classId.name) + "'");
 
 }
 
 v_int16 Deserializer::deInt2(const InData& data) {
   if(data.size != 2) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deInt2()]: "
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deInt2()]: "
                              "Error. Invalid size for Int2 (v_int8)");
   }
   return ntohs(*((p_int16) data.data));
@@ -115,7 +123,7 @@ v_int16 Deserializer::deInt2(const InData& data) {
 
 v_int32 Deserializer::deInt4(const InData& data) {
   if(data.size != 4) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deInt4()]: "
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deInt4()]: "
                              "Error. Invalid size for Int4 (v_int32)");
   }
   return ntohl(*((p_int32) data.data));
@@ -124,7 +132,7 @@ v_int32 Deserializer::deInt4(const InData& data) {
 v_int64 Deserializer::deInt8(const InData& data) {
 
   if(data.size != 8) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deInt8()]: "
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deInt8()]: "
                              "Error. Invalid size for Int8 (v_int64)");
   }
 
@@ -142,7 +150,7 @@ v_int64 Deserializer::deInt(const InData& data) {
     case INT8OID: return deInt8(data);
     case TIMESTAMPOID: return deInt8(data);
   }
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deInt()]: Error. Unknown OID.");
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deInt()]: Error. Unknown OID.");
 }
 
 oatpp::Void Deserializer::deserializeString(const Deserializer* _this, const InData& data, const Type* type) {
@@ -161,7 +169,7 @@ oatpp::Void Deserializer::deserializeString(const Deserializer* _this, const InD
     case VARCHAROID: return oatpp::String(data.data, data.size);
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeString()]: Error. Unknown OID.");
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeString()]: Error. Unknown OID.");
 
 }
 
@@ -185,7 +193,7 @@ oatpp::Void Deserializer::deserializeFloat32(const Deserializer* _this, const In
     }
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeFloat32()]: Error. Unknown OID.");
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeFloat32()]: Error. Unknown OID.");
 
 }
 
@@ -209,7 +217,7 @@ oatpp::Void Deserializer::deserializeFloat64(const Deserializer* _this, const In
     }
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeFloat32()]: Error. Unknown OID.");
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeFloat32()]: Error. Unknown OID.");
 
 }
 
@@ -229,7 +237,7 @@ oatpp::Void Deserializer::deserializeBoolean(const Deserializer* _this, const In
     case INT8OID: return oatpp::Boolean((bool) deInt(data));
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeBoolean()]: Error. Unknown OID.");
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeBoolean()]: Error. Unknown OID.");
 
 }
 
@@ -250,10 +258,10 @@ oatpp::Void Deserializer::deserializeEnum(const Deserializer* _this, const InDat
 
   switch(e) {
     case data::type::EnumInterpreterError::CONSTRAINT_NOT_NULL:
-      throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeEnum()]: Error. Enum constraint violated - 'NotNull'.");
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeEnum()]: Error. Enum constraint violated - 'NotNull'.");
 
     default:
-      throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeEnum()]: Error. Can't deserialize Enum.");
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeEnum()]: Error. Can't deserialize Enum.");
   }
 
 }
@@ -276,7 +284,7 @@ const oatpp::Type* Deserializer::guessAnyType(const InData& data) {
 
     case TIMESTAMPOID: return oatpp::UInt64::Class::getType();
 
-    case UUIDOID: return oatpp::postgresql::Uuid::Class::getType();
+    case UUIDOID: return oatpp::sqlserver::Uuid::Class::getType();
 
     // Arrays
 
@@ -294,7 +302,7 @@ const oatpp::Type* Deserializer::guessAnyType(const InData& data) {
 
     case TIMESTAMPARRAYOID: return generateMultidimensionalArrayType<oatpp::UInt64>(data);
 
-    case UUIDARRAYOID: return generateMultidimensionalArrayType<oatpp::postgresql::Uuid>(data);
+    case UUIDARRAYOID: return generateMultidimensionalArrayType<oatpp::sqlserver::Uuid>(data);
 
   }
 
@@ -311,7 +319,7 @@ oatpp::Void Deserializer::deserializeAny(const Deserializer* _this, const InData
 
   const Type* valueType = guessAnyType(data);
   if(valueType == nullptr) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeAny()]: Error. Unknown OID.");
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeAny()]: Error. Unknown OID.");
   }
 
   auto value = _this->deserialize(data, valueType);
@@ -326,10 +334,10 @@ oatpp::Void Deserializer::deserializeUuid(const Deserializer* _this, const InDat
   (void) type;
 
   if(data.isNull) {
-    return oatpp::postgresql::Uuid();
+    return oatpp::sqlserver::Uuid();
   }
 
-  return postgresql::Uuid((p_char8)data.data);
+  return sqlserver::Uuid((p_char8)data.data);
 
 }
 
@@ -339,7 +347,7 @@ oatpp::Void Deserializer::deserializeSubArray(const Type* type,
 {
 
   if(!type->isCollection) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeSubArray()]: "
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeSubArray()]: "
                              "Error. Unknown collection type.");
   }
 
@@ -388,7 +396,7 @@ oatpp::Void Deserializer::deserializeSubArray(const Type* type,
 
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Deserializer::deserializeSubArray()]: "
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Deserializer::deserializeSubArray()]: "
                            "Error. Invalid state: dimension >= dimensions.size().");
 
 

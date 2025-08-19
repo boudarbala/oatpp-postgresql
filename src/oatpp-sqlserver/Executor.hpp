@@ -22,8 +22,8 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_Executor_hpp
-#define oatpp_postgresql_Executor_hpp
+#ifndef oatpp_sqlserver_Executor_hpp
+#define oatpp_sqlserver_Executor_hpp
 
 #include "ConnectionProvider.hpp"
 #include "QueryResult.hpp"
@@ -37,7 +37,7 @@
 
 #include <vector>
 
-namespace oatpp { namespace postgresql {
+namespace oatpp { namespace sqlserver {
 
 /**
  * Implementation of &id:oatpp::orm::Executor;. for PostgreSQL.
@@ -159,4 +159,4 @@ public:
 
 }}
 
-#endif // oatpp_postgresql_Executor_hpp
+#endif // oatpp_sqlserver_Executor_hpp

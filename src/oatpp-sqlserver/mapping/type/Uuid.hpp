@@ -22,12 +22,12 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_mapping_type_Uuid_hpp
-#define oatpp_postgresql_mapping_type_Uuid_hpp
+#ifndef oatpp_sqlserver_mapping_type_Uuid_hpp
+#define oatpp_sqlserver_mapping_type_Uuid_hpp
 
 #include "oatpp/Types.hpp"
 
-namespace oatpp { namespace postgresql { namespace mapping { namespace type {
+namespace oatpp { namespace sqlserver { namespace mapping { namespace type {
 
 namespace __class {
   class Uuid;
@@ -114,4 +114,4 @@ public:
 
 }}}}
 
-#endif // oatpp_postgresql_mapping_type_Uuid_hpp
+#endif // oatpp_sqlserver_mapping_type_Uuid_hpp
