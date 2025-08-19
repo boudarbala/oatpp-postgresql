@@ -35,6 +35,11 @@ QueryResult::QueryResult(HSTMT stmt,
   , m_resultMapper(resultMapper)
   , m_resultData(stmt, typeResolver)
 {
+  if(m_stmt == SQL_NULL_HSTMT) {
+    m_success = false;
+    m_type = TYPE_ERROR;
+    return;
+  }
   SQLRETURN ret = SQLRowCount(m_stmt, &m_rowCount);
   if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO) {
     if (m_rowCount >= 0) {

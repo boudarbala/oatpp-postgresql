@@ -255,14 +255,30 @@ std::shared_ptr<QueryResult> Executor::executeQuery(const StringTemplate& queryT
                                                     const provider::ResourceHandle<orm::Connection>& connection)
 {
 
-  auto pgConnection = std::static_pointer_cast<Connection>(connection.object);
-  QueryParams queryParams(queryTemplate, params, m_serializer, typeResolver);
+  // Minimal implementation for queries without parameters.
+  // Executes the prepared template text directly via ODBC.
+  (void)params; // not supported in this minimal implementation
+  auto extra = std::static_pointer_cast<ql_template::Parser::TemplateExtra>(queryTemplate.getExtraData());
+  if(!extra || !extra->preparedTemplate) {
+    throw std::runtime_error("[oatpp::sqlserver::Executor::executeQuery()]: Error. Invalid template.");
+  }
 
-  // TODO: Implement ODBC version of parameterized query execution
-  // This should use SQLExecDirect with parameter binding
-  SQLHSTMT hstmt = nullptr; // Placeholder for ODBC implementation
+  auto conn = connection;
+  if(!conn) {
+    conn = getConnection();
+  }
 
-  return std::make_shared<QueryResult>(hstmt, connection, m_resultMapper, typeResolver);
+  auto sqlText = extra->preparedTemplate;
+  auto sqlConn = std::static_pointer_cast<Connection>(conn.object);
+
+  SQLHDBC hdbc = sqlConn->getHandle();
+  SQLHSTMT hstmt = SQL_NULL_HSTMT;
+  if(SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt) != SQL_SUCCESS) {
+    throw std::runtime_error("[oatpp::sqlserver::Executor::executeQuery()]: Error. SQLAllocHandle(STMT) failed.");
+  }
+  auto rc = SQLExecDirect(hstmt, (SQLCHAR*)sqlText->c_str(), SQL_NTS);
+  // Always return QueryResult with the statement handle so diagnostics are available
+  return std::make_shared<QueryResult>(hstmt, conn, m_resultMapper, typeResolver);
 
 }
 
@@ -350,17 +366,22 @@ std::shared_ptr<orm::QueryResult> Executor::exec(const oatpp::String& statement,
     conn = getConnection();
   }
 
-  auto pgConnection = std::static_pointer_cast<sqlserver::Connection>(conn.object);
+  (void)useExecParams; // Unused in this minimal implementation
+  auto sqlConn = std::static_pointer_cast<sqlserver::Connection>(conn.object);
+  SQLHDBC hdbc = sqlConn->getHandle();
 
-  // TODO: Implement ODBC version of direct query execution
-  SQLHSTMT hstmt = nullptr; // Placeholder for ODBC implementation
-  
+  SQLHSTMT hstmt = SQL_NULL_HSTMT;
+  if(SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt) != SQL_SUCCESS) {
+    throw std::runtime_error("[oatpp::sqlserver::Executor::exec()]: Error. SQLAllocHandle(STMT) failed.");
+  }
+  auto rc = SQLExecDirect(hstmt, (SQLCHAR*)statement->c_str(), SQL_NTS);
+  // Return result regardless of rc; QueryResult will expose success/diagnostics
   return std::make_shared<QueryResult>(hstmt, conn, m_resultMapper, m_defaultTypeResolver);
 
 }
 
 std::shared_ptr<orm::QueryResult> Executor::begin(const provider::ResourceHandle<orm::Connection>& connection) {
-  return exec("BEGIN", connection);
+  return exec("BEGIN TRANSACTION", connection);
 }
 
 std::shared_ptr<orm::QueryResult> Executor::commit(const provider::ResourceHandle<orm::Connection>& connection) {
@@ -368,7 +389,7 @@ std::shared_ptr<orm::QueryResult> Executor::commit(const provider::ResourceHandl
     throw std::runtime_error("[oatpp::sqlserver::Executor::commit()]: "
                              "Error. Can't COMMIT - NULL connection.");
   }
-  return exec("COMMIT", connection);
+  return exec("COMMIT TRANSACTION", connection);
 }
 
 std::shared_ptr<orm::QueryResult> Executor::rollback(const provider::ResourceHandle<orm::Connection>& connection) {
@@ -376,7 +397,7 @@ std::shared_ptr<orm::QueryResult> Executor::rollback(const provider::ResourceHan
     throw std::runtime_error("[oatpp::sqlserver::Executor::commit()]: "
                              "Error. Can't ROLLBACK - NULL connection.");
   }
-  return exec("ROLLBACK", connection);
+  return exec("ROLLBACK TRANSACTION", connection);
 }
 
 oatpp::String Executor::getSchemaVersionTableName(const oatpp::String& suffix) {
