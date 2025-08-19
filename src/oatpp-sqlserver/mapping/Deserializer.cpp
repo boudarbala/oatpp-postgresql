@@ -31,12 +31,20 @@
 
 namespace oatpp { namespace sqlserver { namespace mapping {
 
-Deserializer::InData::InData(PGresult* dbres, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver) {
+Deserializer::InData::InData(SQLHSTMT hstmt, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver) {
   typeResolver = pTypeResolver;
-  oid = PQftype(dbres, col);
-  size = PQgetlength(dbres, row, col);
-  data = PQgetvalue(dbres, row, col);
-  isNull = PQgetisnull(dbres, row, col) == 1;
+  
+  // TODO: Implement ODBC-specific data retrieval
+  // For now, set defaults to allow compilation
+  oid = SQL_UNKNOWN_TYPE;
+  size = 0;
+  data = nullptr;
+  isNull = true;
+  
+  // In a real implementation, we would:
+  // 1. Use SQLGetData or SQLFetch to get the data
+  // 2. Use SQLDescribeCol to get column metadata
+  // 3. Use SQLColAttribute to get type information
 }
 
 Deserializer::Deserializer() {

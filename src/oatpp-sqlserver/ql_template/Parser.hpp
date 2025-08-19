@@ -28,7 +28,8 @@
 #include "oatpp/orm/Executor.hpp"
 #include "oatpp/utils/parser/Caret.hpp"
 
-#include <libpq-fe.h>
+#include <sql.h>
+#include <sqlext.h>
 
 namespace oatpp { namespace sqlserver { namespace ql_template {
 

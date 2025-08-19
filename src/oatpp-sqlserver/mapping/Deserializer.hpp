@@ -53,7 +53,7 @@ public:
 
     InData() = default;
 
-    InData(PGresult* dbres, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver);
+    InData(SQLHSTMT hstmt, int row, int col, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver);
 
     std::shared_ptr<const data::mapping::TypeResolver> typeResolver;
 
@@ -155,7 +155,7 @@ private:
     const Deserializer* _this;
     const InData* data;
     data::stream::BufferInputStream stream;
-    PgArrayHeader arrayHeader;
+    SqlArrayHeader arrayHeader;
     std::vector<v_int32> dimensions;
 
   };

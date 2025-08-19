@@ -27,18 +27,24 @@
 
 namespace oatpp { namespace sqlserver { namespace mapping {
 
-ResultMapper::ResultData::ResultData(PGresult* pDbResult, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver)
-  : dbResult(pDbResult)
+ResultMapper::ResultData::ResultData(SQLHSTMT pHstmt, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver)
+  : hstmt(pHstmt)
   , typeResolver(pTypeResolver)
 {
 
   rowIndex = 0;
-  rowCount = PQntuples(dbResult);
+  rowCount = 0; // TODO: Implement ODBC row counting
 
   {
-    colCount = PQnfields(dbResult);
+    // TODO: Implement ODBC column enumeration
+    colCount = 0;
+    SQLSMALLINT numCols = 0;
+    SQLNumResultCols(hstmt, &numCols);
+    colCount = numCols;
+    
     for (v_int32 i = 0; i < colCount; i++) {
-      oatpp::String colName = (const char*) PQfname(dbResult, i);
+      // TODO: Get column names using SQLDescribeCol
+      oatpp::String colName = "col_" + std::to_string(i);
       colNames.push_back(colName);
       colIndices.insert({colName, i});
     }
@@ -96,7 +102,7 @@ oatpp::Void ResultMapper::readOneRowAsCollection(ResultMapper* _this, ResultData
   const Type* itemType = *type->params.begin();
 
   for(v_int32 i = 0; i < dbData->colCount; i ++) {
-    mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
+    mapping::Deserializer::InData inData(dbData->hstmt, rowIndex, i, dbData->typeResolver);
     dispatcher->addItem(collection, _this->m_deserializer.deserialize(inData, itemType));
   }
 
@@ -116,7 +122,7 @@ oatpp::Void ResultMapper::readOneRowAsMap(ResultMapper* _this, ResultData* dbDat
 
   const Type* valueType = dispatcher->getValueType();
   for(v_int32 i = 0; i < dbData->colCount; i ++) {
-    mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
+    mapping::Deserializer::InData inData(dbData->hstmt, rowIndex, i, dbData->typeResolver);
     dispatcher->addItem(map, dbData->colNames[i], _this->m_deserializer.deserialize(inData, valueType));
   }
 
@@ -136,7 +142,7 @@ oatpp::Void ResultMapper::readOneRowAsObject(ResultMapper* _this, ResultData* db
 
     if(it != fieldsMap.end()) {
       auto field = it->second;
-      mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
+      mapping::Deserializer::InData inData(dbData->hstmt, rowIndex, i, dbData->typeResolver);
       field->set(static_cast<oatpp::BaseObject*>(object.get()), _this->m_deserializer.deserialize(inData, field->type));
     } else {
       OATPP_LOGe("[oatpp::sqlserver::mapping::ResultMapper::readRowAsObject]",

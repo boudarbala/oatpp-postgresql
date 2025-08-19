@@ -49,12 +49,12 @@ public:
      * @param pDbResult
      * @param pTypeResolver
      */
-    ResultData(PGresult* pDbResult, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver);
+    ResultData(SQLHSTMT pHstmt, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver);
 
     /**
-     * PGResult.
+     * ODBC Statement Handle.
      */
-    PGresult* dbResult;
+    SQLHSTMT hstmt;
 
     /**
      * &id:oatpp::data::mapping::TypeResolver;.

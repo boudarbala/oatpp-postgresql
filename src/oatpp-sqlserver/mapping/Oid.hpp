@@ -37,6 +37,11 @@
 #include <sql.h>
 #include <sqlext.h>
 
+// Handle Windows BOOL macro conflict with oatpp
+#ifdef BOOL
+#undef BOOL
+#endif
+
 // SQL Server data type mappings
 #define SQL_TYPE_VARCHAR        SQL_VARCHAR
 #define SQL_TYPE_CHAR           SQL_CHAR
@@ -69,5 +74,35 @@ typedef SQLSMALLINT SqlOid;
 typedef SQLSMALLINT Oid; // Compatibility alias
 #define InvalidSqlOid           SQL_UNKNOWN_TYPE
 #define InvalidOid              InvalidSqlOid
+
+// SQL Server OID mappings using SQL data types
+// Use distinct values to avoid duplicate case labels
+#define TEXTOID                 SQL_LONGVARCHAR      // SQL Server TEXT type
+#define TEXTARRAYOID            (SQL_LONGVARCHAR+1000)  // Array handling will be different in SQL Server
+#define VARCHAROID              SQL_VARCHAR
+#define VARCHARARRAYOID         (SQL_VARCHAR+1000)
+#define CHAROID                 SQL_CHAR
+#define BPCHAROID               (SQL_CHAR+100)    // PostgreSQL BPCHAR -> distinct from CHAR
+
+#define INT2OID                 SQL_SMALLINT
+#define INT2ARRAYOID            (SQL_SMALLINT+1000)
+#define INT4OID                 SQL_INTEGER  
+#define INT4ARRAYOID            (SQL_INTEGER+1000)
+#define INT8OID                 SQL_BIGINT
+#define INT8ARRAYOID            (SQL_BIGINT+1000)
+
+#define FLOAT4OID               SQL_REAL
+#define FLOAT4ARRAYOID          (SQL_REAL+1000)
+#define FLOAT8OID               SQL_DOUBLE
+#define FLOAT8ARRAYOID          (SQL_DOUBLE+1000)
+
+#define BOOLOID                 SQL_BIT
+#define BOOLARRAYOID            (SQL_BIT+1000)
+
+#define TIMESTAMPOID            SQL_TYPE_TIMESTAMP
+#define TIMESTAMPARRAYOID       (SQL_TYPE_TIMESTAMP+1000)
+
+#define UUIDOID                 SQL_GUID
+#define UUIDARRAYOID            (SQL_GUID+1000)
 
 #endif // oatpp_sqlserver_mapping_Oid_hpp
