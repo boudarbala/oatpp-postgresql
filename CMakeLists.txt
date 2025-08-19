@@ -169,3 +169,9 @@ if(OATPP_BUILD_TESTS)
     enable_testing()
     add_subdirectory("test")
 endif()
+
+# Optional: build examples
+option(OATPP_BUILD_EXAMPLES "Build examples for this module" ON)
+if(OATPP_BUILD_EXAMPLES)
+    add_subdirectory("examples/simple")
+endif()

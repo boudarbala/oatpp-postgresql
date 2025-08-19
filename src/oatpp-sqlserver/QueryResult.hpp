@@ -30,6 +30,15 @@
 #include "mapping/ResultMapper.hpp"
 #include "oatpp/orm/QueryResult.hpp"
 
+// Ensure Windows headers included before any ODBC dependent usage in this header's declarations
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+
 namespace oatpp { namespace sqlserver {
 
 

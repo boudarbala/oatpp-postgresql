@@ -30,6 +30,15 @@
 #include "oatpp/provider/Pool.hpp"
 #include "oatpp/Types.hpp"
 
+// Include Windows headers to ensure ODBC dependent Windows types are defined on all translation units
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
+
 namespace oatpp { namespace sqlserver {
 
 /**
