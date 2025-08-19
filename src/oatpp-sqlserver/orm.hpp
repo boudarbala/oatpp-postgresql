@@ -24,12 +24,40 @@
 
 /**[info]
  *
- * This is just a header file which includes all oatpp-sqlserver components:
+ * This header file includes all oatpp-sqlserver components with sophisticated ORM features:
  *
+ * Core Components:
  * ```cpp
  * #include "Executor.hpp"
  * #include "Types.hpp"
+ * ```
  *
+ * Advanced Query Building:
+ * ```cpp
+ * #include "QueryBuilder.hpp"
+ * #include "AdvancedDbClient.hpp"
+ * ```
+ *
+ * Enhanced Type System:
+ * - High-precision Decimal type for DECIMAL/NUMERIC columns
+ * - DateTime2 type with fractional seconds precision (0-7)
+ * - DateTimeOffset type with timezone information
+ * - Time type for time-of-day values
+ * - Date type for date-only values
+ * - UUID type for UNIQUEIDENTIFIER columns
+ *
+ * Advanced Features:
+ * - Sophisticated query builder with CTEs, window functions
+ * - Bulk operations for high-performance data loading
+ * - Stored procedure execution with typed parameters
+ * - Performance monitoring and query metrics
+ * - Connection health monitoring
+ * - Pagination support with OFFSET/FETCH NEXT
+ * - MERGE statement support for upsert operations
+ * - Table-valued parameters (future)
+ *
+ * Standard oatpp ORM:
+ * ```cpp
  * #include "oatpp/orm/SchemaMigration.hpp"
  * #include "oatpp/orm/DbClient.hpp"
  * #include "oatpp/macro/codegen.hpp"
@@ -41,6 +69,8 @@
 
 #include "Executor.hpp"
 #include "Types.hpp"
+#include "QueryBuilder.hpp"
+#include "AdvancedDbClient.hpp"
 
 #include "oatpp/orm/SchemaMigration.hpp"
 #include "oatpp/orm/DbClient.hpp"
