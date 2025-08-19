@@ -25,7 +25,7 @@ option(OATPP_DIR_LIB "Path to directory with liboatpp (directory containing ex: 
 option(OATPP_BUILD_TESTS "Build tests for this module" ON)
 option(OATPP_INSTALL "Install module binaries" ON)
 
-set(OATPP_MODULES_LOCATION "INSTALLED" CACHE STRING "Location where to find oatpp modules. can be [INSTALLED|EXTERNAL|CUSTOM]")
+set(OATPP_MODULES_LOCATION "SUBMODULE" CACHE STRING "Location where to find oatpp modules. can be [INSTALLED|EXTERNAL|CUSTOM|SUBMODULE]")
 
 ###################################################################################################
 ## get oatpp main module in specified location
@@ -33,6 +33,7 @@ set(OATPP_MODULES_LOCATION "INSTALLED" CACHE STRING "Location where to find oatp
 set(OATPP_MODULES_LOCATION_INSTALLED INSTALLED)
 set(OATPP_MODULES_LOCATION_EXTERNAL EXTERNAL)
 set(OATPP_MODULES_LOCATION_CUSTOM CUSTOM)
+set(OATPP_MODULES_LOCATION_SUBMODULE SUBMODULE)
 
 if(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_INSTALLED)
 
@@ -71,6 +72,21 @@ elseif(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_EXTERNAL)
     message("OATPP_DIR_SRC --> '${OATPP_DIR_SRC}'")
     message("OATPP_DIR_LIB --> '${OATPP_DIR_LIB}'")
 
+elseif(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_SUBMODULE)
+
+    message("Finding oatpp in location=SUBMODULE")
+
+    # Add oatpp submodule as subdirectory
+    set(OATPP_BUILD_TESTS OFF CACHE BOOL "Don't build oatpp tests")
+    add_subdirectory(deps/oatpp)
+    
+    # Set paths for oatpp
+    set(OATPP_DIR_SRC ${CMAKE_CURRENT_SOURCE_DIR}/deps/oatpp/src)
+    set(OATPP_DIR_LIB ${CMAKE_CURRENT_BINARY_DIR}/deps/oatpp/src)
+
+    message("OATPP_DIR_SRC --> '${OATPP_DIR_SRC}'")
+    message("OATPP_DIR_LIB --> '${OATPP_DIR_LIB}'")
+
 elseif(OATPP_MODULES_LOCATION STREQUAL OATPP_MODULES_LOCATION_CUSTOM)
 
     message("Finding oatpp in location=CUSTOM")
@@ -92,12 +108,49 @@ endif()
 message("\n############################################################################")
 message("## ${OATPP_THIS_MODULE_NAME} module. Resolving dependencies...\n")
 
-# Find ODBC
-find_path(ODBC_INCLUDE_DIR sql.h PATHS /usr/include /usr/local/include)
-find_library(ODBC_LIBRARY NAMES odbc PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu)
+# Find ODBC - Cross-platform detection
+if(WIN32)
+    # Windows ODBC detection
+    find_path(ODBC_INCLUDE_DIR 
+        NAMES sql.h
+        PATHS
+            "$ENV{ProgramFiles}/Microsoft SQL Server/Client SDK/ODBC/130/SDK/Include"
+            "$ENV{ProgramFiles}/Microsoft SQL Server/Client SDK/ODBC/110/SDK/Include"
+            "$ENV{ProgramFiles}/Microsoft SQL Server/Client SDK/ODBC/100/SDK/Include"
+            "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/130/SDK/Include"
+            "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/110/SDK/Include"
+            "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/100/SDK/Include"
+            "${CMAKE_CURRENT_SOURCE_DIR}/deps/windows/include"
+    )
+    
+    find_library(ODBC_LIBRARY 
+        NAMES odbc32 odbccp32
+        PATHS
+            "$ENV{ProgramFiles}/Microsoft SQL Server/Client SDK/ODBC/130/SDK/Lib/x64"
+            "$ENV{ProgramFiles}/Microsoft SQL Server/Client SDK/ODBC/110/SDK/Lib/x64"
+            "$ENV{ProgramFiles}/Microsoft SQL Server/Client SDK/ODBC/100/SDK/Lib/x64"
+            "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/130/SDK/Lib/x64"
+            "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/110/SDK/Lib/x64"
+            "C:/Program Files/Microsoft SQL Server/Client SDK/ODBC/100/SDK/Lib/x64"
+            "${CMAKE_CURRENT_SOURCE_DIR}/deps/windows/lib"
+    )
+    
+    # If not found, try system directories
+    if(NOT ODBC_LIBRARY)
+        find_library(ODBC_LIBRARY NAMES odbc32)
+    endif()
+else()
+    # Unix/Linux ODBC detection (existing logic)
+    find_path(ODBC_INCLUDE_DIR sql.h PATHS /usr/include /usr/local/include)
+    find_library(ODBC_LIBRARY NAMES odbc PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu)
+endif()
 
 if(NOT ODBC_INCLUDE_DIR OR NOT ODBC_LIBRARY)
-    message(FATAL_ERROR "ODBC library not found. Please install unixodbc-dev or similar package.")
+    if(WIN32)
+        message(FATAL_ERROR "ODBC library not found. Please install Microsoft ODBC Driver for SQL Server or Visual Studio with C++ tools.")
+    else()
+        message(FATAL_ERROR "ODBC library not found. Please install unixodbc-dev or similar package.")
+    endif()
 endif()
 
 message("ODBC_INCLUDE_DIR=${ODBC_INCLUDE_DIR}")

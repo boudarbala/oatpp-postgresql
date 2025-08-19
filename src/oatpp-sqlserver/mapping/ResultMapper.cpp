@@ -25,7 +25,7 @@
 #include "ResultMapper.hpp"
 #include "oatpp/base/Log.hpp"
 
-namespace oatpp { namespace postgresql { namespace mapping {
+namespace oatpp { namespace sqlserver { namespace mapping {
 
 ResultMapper::ResultData::ResultData(PGresult* pDbResult, const std::shared_ptr<const data::mapping::TypeResolver>& pTypeResolver)
   : dbResult(pDbResult)
@@ -111,7 +111,7 @@ oatpp::Void ResultMapper::readOneRowAsMap(ResultMapper* _this, ResultData* dbDat
 
   const Type* keyType = dispatcher->getKeyType();
   if(keyType->classId.id != oatpp::data::type::__class::String::CLASS_ID.id){
-    throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readOneRowAsMap()]: Invalid map key. Key should be String");
+    throw std::runtime_error("[oatpp::sqlserver::mapping::ResultMapper::readOneRowAsMap()]: Invalid map key. Key should be String");
   }
 
   const Type* valueType = dispatcher->getValueType();
@@ -139,10 +139,10 @@ oatpp::Void ResultMapper::readOneRowAsObject(ResultMapper* _this, ResultData* db
       mapping::Deserializer::InData inData(dbData->dbResult, rowIndex, i, dbData->typeResolver);
       field->set(static_cast<oatpp::BaseObject*>(object.get()), _this->m_deserializer.deserialize(inData, field->type));
     } else {
-      OATPP_LOGe("[oatpp::postgresql::mapping::ResultMapper::readRowAsObject]",
+      OATPP_LOGe("[oatpp::sqlserver::mapping::ResultMapper::readRowAsObject]",
                  "Error. The object of type '{}' has no field to map column '{}'.",
                  type->nameQualifier, dbData->colNames[i]->c_str());
-      throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readRowAsObject]: Error. "
+      throw std::runtime_error("[oatpp::sqlserver::mapping::ResultMapper::readRowAsObject]: Error. "
                                "The object of type " + std::string(type->nameQualifier) +
                                " has no field to map column " + *dbData->colNames[i] + ".");
     }
@@ -189,7 +189,7 @@ oatpp::Void ResultMapper::readOneRow(ResultData* dbData, const Type* type, v_int
     return interpretation->fromInterpretation(readOneRow(dbData, interpretation->getInterpretationType(), rowIndex));
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readOneRow()]: "
+  throw std::runtime_error("[oatpp::sqlserver::mapping::ResultMapper::readOneRow()]: "
                            "Error. Invalid result container type. "
                            "Allowed types are "
                            "oatpp::Vector, "
@@ -214,7 +214,7 @@ oatpp::Void ResultMapper::readRows(ResultData* dbData, const Type* type, v_int64
     return (*method)(this, dbData, type, count);
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::ResultMapper::readRows()]: "
+  throw std::runtime_error("[oatpp::sqlserver::mapping::ResultMapper::readRows()]: "
                            "Error. Invalid result container type. "
                            "Allowed types are oatpp::Vector, oatpp::List, oatpp::UnorderedSet");
 

@@ -22,15 +22,15 @@
  *
  ***************************************************************************/
 
-#ifndef oatpp_postgresql_ql_template_Parser_hpp
-#define oatpp_postgresql_ql_template_Parser_hpp
+#ifndef oatpp_sqlserver_ql_template_Parser_hpp
+#define oatpp_sqlserver_ql_template_Parser_hpp
 
 #include "oatpp/orm/Executor.hpp"
 #include "oatpp/utils/parser/Caret.hpp"
 
 #include <libpq-fe.h>
 
-namespace oatpp { namespace postgresql { namespace ql_template {
+namespace oatpp { namespace sqlserver { namespace ql_template {
 
 /**
  * Query template parser.
@@ -101,4 +101,4 @@ public:
 
 }}}
 
-#endif // oatpp_postgresql_ql_template_Parser_hpp
+#endif // oatpp_sqlserver_ql_template_Parser_hpp

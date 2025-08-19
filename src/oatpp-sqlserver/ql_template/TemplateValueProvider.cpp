@@ -24,7 +24,7 @@
 
 #include "TemplateValueProvider.hpp"
 
-namespace oatpp { namespace postgresql { namespace ql_template {
+namespace oatpp { namespace sqlserver { namespace ql_template {
 
 oatpp::String TemplateValueProvider::getValue(const data::share::StringTemplate::Variable& variable, v_uint32 index) {
   m_buffStream.setCurrentPosition(0);

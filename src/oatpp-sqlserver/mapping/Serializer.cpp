@@ -72,7 +72,7 @@ void Serializer::setSerializerMethods() {
 
   ////
 
-  setSerializerMethod(postgresql::mapping::type::__class::Uuid::CLASS_ID, &Serializer::serializeUuid);
+  setSerializerMethod(sqlserver::mapping::type::__class::Uuid::CLASS_ID, &Serializer::serializeUuid);
 
 }
 
@@ -123,8 +123,8 @@ void Serializer::setTypeOidMethods() {
 
   ////
 
-  setTypeOidMethod(postgresql::mapping::type::__class::Uuid::CLASS_ID, &Serializer::getTypeOid<UUIDOID>);
-  setArrayTypeOidMethod(postgresql::mapping::type::__class::Uuid::CLASS_ID, &Serializer::getTypeOid<UUIDARRAYOID>);
+  setTypeOidMethod(sqlserver::mapping::type::__class::Uuid::CLASS_ID, &Serializer::getTypeOid<UUIDOID>);
+  setArrayTypeOidMethod(sqlserver::mapping::type::__class::Uuid::CLASS_ID, &Serializer::getTypeOid<UUIDARRAYOID>);
 
 }
 
@@ -158,7 +158,7 @@ void Serializer::serialize(OutputData& outData, const oatpp::Void& polymorph) co
   if(method) {
     (*method)(this, outData, polymorph);
   } else {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serialize()]: "
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serialize()]: "
                              "Error. No serialize method for type '" + std::string(polymorph.getValueType()->classId.name) +
                              "'");
   }
@@ -172,7 +172,7 @@ Oid Serializer::getTypeOid(const oatpp::Type* type) const {
     return (*method)(this, type);
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::getTypeOid()]: "
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::getTypeOid()]: "
                            "Error. Can't derive OID for type '" + std::string(type->classId.name) +
                            "'");
 
@@ -186,7 +186,7 @@ Oid Serializer::getArrayTypeOid(const oatpp::Type* type) const {
     return (*method)(this, type);
   }
 
-  throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::getArrayTypeOid()]: "
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::getArrayTypeOid()]: "
                            "Error. Can't derive OID for type '" + std::string(type->classId.name) +
                            "'");
 
@@ -343,7 +343,7 @@ void Serializer::serializeUInt64(const Serializer* _this, OutputData& outData, c
   (void) _this;
   (void) outData;
   (void) polymorph;
-  throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeUInt64()]: Error. Not implemented!");
+  throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeUInt64()]: Error. Not implemented!");
 }
 
 void Serializer::serializeFloat32(const Serializer* _this, OutputData& outData, const oatpp::Void& polymorph) {
@@ -420,9 +420,9 @@ void Serializer::serializeEnum(const Serializer* _this, OutputData& outData, con
 
   switch(e) {
     case data::type::EnumInterpreterError::CONSTRAINT_NOT_NULL:
-      throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeEnum()]: Error. Enum constraint violated - 'NotNull'.");
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeEnum()]: Error. Enum constraint violated - 'NotNull'.");
     default:
-      throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeEnum()]: Error. Can't serialize Enum.");
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeEnum()]: Error. Can't serialize Enum.");
   }
 
 }
@@ -467,7 +467,7 @@ void Serializer::serializeUuid(const Serializer* _this, OutputData& outData, con
   (void) _this;
 
   if(polymorph) {
-    auto v = polymorph.cast<postgresql::Uuid>();
+    auto v = polymorph.cast<sqlserver::Uuid>();
     outData.data = (char*) v->getData();
     outData.dataSize = v->getSize();
     outData.dataFormat = 1;
@@ -484,7 +484,7 @@ const oatpp::Type* Serializer::getArrayItemTypeAndDimensions(const oatpp::Void& 
   while(curr.getValueType()->isCollection) {
 
     if(curr == nullptr) {
-      throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::getArrayItemTypeAndDimensions()]: Error. "
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::getArrayItemTypeAndDimensions()]: Error. "
                                "The nested container can't be null.");
     }
 
@@ -513,7 +513,7 @@ void Serializer::serializeSubArray(data::stream::ConsistentOutputStream* stream,
 
   const oatpp::Type* type = polymorph.getValueType();
   if(!type->isCollection) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeSubArray()]: Error. Unknown collection type.");
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeSubArray()]: Error. Unknown collection type.");
   }
 
   auto dispatcher = static_cast<const data::type::__class::Collection::PolymorphicDispatcher*>(type->polymorphicDispatcher);
@@ -524,7 +524,7 @@ void Serializer::serializeSubArray(data::stream::ConsistentOutputStream* stream,
     auto size = meta.dimensions[dimension];
 
     if(dispatcher->getCollectionSize(polymorph) != size) {
-      throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeSubArray()]. Error. "
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeSubArray()]. Error. "
                                "All nested arrays must be of the same size.");
     }
 
@@ -539,7 +539,7 @@ void Serializer::serializeSubArray(data::stream::ConsistentOutputStream* stream,
     auto size = meta.dimensions[dimension];
 
     if(dispatcher->getCollectionSize(polymorph) != size) {
-      throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeSubArray()]. Error. "
+      throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeSubArray()]. Error. "
                                "All nested arrays must be of the same size.");
     }
 
@@ -574,7 +574,7 @@ void Serializer::serializeArray(const Serializer* _this, OutputData& outData, co
   const oatpp::Type* itemType = getArrayItemTypeAndDimensions(polymorph, meta.dimensions);
 
   if(meta.dimensions.empty()) {
-    throw std::runtime_error("[oatpp::postgresql::mapping::Serializer::serializeArray()]: Error. "
+    throw std::runtime_error("[oatpp::sqlserver::mapping::Serializer::serializeArray()]: Error. "
                              "Invalid array.");
   }
 
