@@ -1,5 +1,6 @@
 #include "oatpp/Environment.hpp"
 #include "oatpp/Types.hpp"
+#include "oatpp/orm/DbClient.hpp"
 #include "oatpp-sqlserver/ConnectionProvider.hpp"
 #include "oatpp-sqlserver/Executor.hpp"
 #include "oatpp/macro/codegen.hpp"
